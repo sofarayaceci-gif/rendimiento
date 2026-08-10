@@ -96,6 +96,24 @@ ul,ol{ padding:0; list-style:none; }
 .punto.trabajando{ background:var(--verde); animation:latido 1s ease-in-out infinite; }
 @keyframes latido{ 50%{ opacity:.2; } }
 
+/* La tuerca de Ajustes, a la par del punto. Ajustes no es una sección que se
+   visite todos los días —son listas que se tocan de vez en cuando—, así que
+   no se gana una pestaña; vive acá arriba y deja el espacio para lo que sí
+   se usa a diario. */
+.icono-top{
+  appearance:none; cursor:pointer; flex:none;
+  width:34px; height:34px; margin-left:2px;
+  display:grid; place-items:center;
+  border:1px solid transparent; border-radius:9px;
+  background:none; color:var(--g500);
+  transition:var(--trans);
+}
+.icono-top svg{ width:19px; height:19px; }
+.icono-top[aria-pressed="true"]{
+  background:var(--verde-bg); border-color:var(--verde-bd); color:var(--verde-t);
+}
+@media (hover:hover){ .icono-top:hover{ background:var(--g100); color:var(--g900); } }
+
 .tabs{ display:flex; overflow-x:auto; scrollbar-width:none; }
 .tabs::-webkit-scrollbar{ display:none; }
 .tab{
@@ -117,6 +135,12 @@ ul,ol{ padding:0; list-style:none; }
    ============================================================ */
 
 main{ max-width:1120px; margin:0 auto; padding:16px 16px 96px; }
+
+/* Encabezado de una vista que no tiene pestaña: la flecha de volver y el
+   nombre de dónde está uno. */
+.cabecera-vista{ display:flex; align-items:center; gap:11px; margin-bottom:14px; }
+.cabecera-vista h2{ font-size:17px; font-weight:650; letter-spacing:-.01em; }
+.cabecera-vista .icono-btn{ font-size:18px; }
 
 .card{
   background:var(--blanco);
@@ -225,11 +249,6 @@ input[type="time"]{ min-height:46px; }
 }
 .combo-list li.is-active{ background:var(--verde-bg); }
 .combo-list li mark{ background:transparent; color:var(--verde-t); font-weight:700; }
-.combo-list li.vacio{ cursor:default; color:var(--g500); font-style:italic; }
-.combo-list li .marca-nuevo{
-  margin-left:auto; font-size:10.5px; font-weight:700; letter-spacing:.04em;
-  text-transform:uppercase; color:var(--g400);
-}
 
 /* ============================================================
    Botones
@@ -279,7 +298,6 @@ input[type="time"]{ min-height:46px; }
   .btn-rojo:not(:disabled):hover{ background:#fbe6e4; border-color:var(--rojo); }
   .btn-plano:hover{ background:var(--g100); color:var(--g900); }
   .combo-list li:hover{ background:var(--verde-bg); }
-  .combo-list li.vacio:hover{ background:transparent; }
   .combo-clear:hover{ background:var(--g100); color:var(--g900); }
   .icono-btn:hover{ border-color:var(--verde); color:var(--g900); }
   .icono-btn.peligro:hover{ border-color:var(--rojo); background:var(--rojo-bg); }

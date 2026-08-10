@@ -457,7 +457,12 @@ class Combobox{
              .map(o => o.i)
       : items.slice();
 
-    this.activo = this.filtrado.length ? 0 : -1;
+    /* Sin coincidencias no se abre nada. Acá siempre se puede escribir libre,
+       así que un desplegable con un solo renglón diciendo «no hay nada» no
+       informa de nada y sí tapa el campo justo cuando se está escribiendo. */
+    if(!this.filtrado.length) return this.cerrar();
+
+    this.activo = 0;
     this.pintarLista(texto);
     this.lista.hidden = false;
     this.input.setAttribute('aria-expanded', 'true');
@@ -493,15 +498,6 @@ class Combobox{
   }
 
   pintarLista(texto){
-    if(!this.filtrado.length){
-      const hay = (this.obtener() || []).length;
-      this.lista.innerHTML = '<li class="vacio">' +
-        (this.valor()
-          ? 'Sin coincidencias · se guarda lo que escriba'
-          : (hay ? 'Sin coincidencias' : 'Todavía no hay nada en la lista')) +
-        '</li>';
-      return;
-    }
     this.lista.innerHTML = this.filtrado.map((item, i) => {
       let etiqueta = escapar(item);
       if(texto){
@@ -1289,7 +1285,17 @@ function editarEncabezado(e){
 }
 
 /* ============================================================
-   Vista: Historial
+   Vista: Rendimientos
+
+   Historial y Rendimientos eran dos pantallas que enseñaban los mismos estudios
+   con dos caras distintas. Quedó una sola: arriba el filtro —buscador y
+   fechas—, en medio los promedios por grupo, y abajo los estudios que todavía
+   no se pueden promediar. A cualquiera se llega tocándolo, venga de donde venga.
+
+   Un estudio suelto es una anécdota. El valor aparece al juntar varios de la
+   misma cuadrilla y la misma tarea: ahí se ve el promedio, cuánto varía, y
+   —lo que de verdad sirve para cotizar— cuánto del tiempo es montaje fijo y
+   cuánto crece con la cantidad.
    ============================================================ */
 
 function estudiosFiltrados(){
@@ -1308,59 +1314,32 @@ function estudiosFiltrados(){
                     cuando(b).localeCompare(cuando(a)));
 }
 
-function pintarHistorial(){
-  const lista = estudiosFiltrados();
-  const todos = vivos();
+/* Los que no se pueden promediar: los abiertos y los que cerraron sin anotar la
+   producción. Van en su propia lista, y no escondidos, porque si no quedarían
+   inalcanzables: no salen en ningún grupo y no habría manera de volver a
+   abrirlos para terminarlos. */
+function pintarFuera(fuera){
+  id('card-fuera').hidden = !fuera.length;
+  if(!fuera.length) return;
 
-  id('pill-hist').textContent = todos.length;
-  id('et-historial').textContent = lista.length === todos.length
-    ? (todos.length + (todos.length === 1 ? ' estudio' : ' estudios'))
-    : (lista.length + ' de ' + todos.length);
-  id('b-excel-todos').disabled = lista.length === 0;
+  id('et-fuera').textContent = fuera.length +
+    (fuera.length === 1 ? ' estudio' : ' estudios');
 
-  const cont = id('lista-historial');
-
-  if(!lista.length){
-    cont.innerHTML = '<li style="cursor:default"><div class="vacio-estado" style="width:100%">' +
-      '<p class="t">' + (todos.length ? 'Nada con ese filtro' : 'Todavía no hay estudios') + '</p>' +
-      '<p>' + (todos.length
-        ? 'Pruebe con otro texto o limpie las fechas.'
-        : 'Arranque uno desde la pestaña Estudio.') + '</p></div></li>';
-    return;
-  }
-
-  cont.innerHTML = lista.map(e => {
-    const c = calcular(e);
-    const u = e.unidad || 'unidad';
-    return '<li data-est="' + escapar(e.id) + '"' +
-      (e.cerrado ? '' : ' class="abierto"') + '>' +
+  id('lista-fuera').innerHTML = fuera.map(({ e, c }) =>
+    '<li data-est="' + escapar(e.id) + '"' + (e.cerrado ? '' : ' class="abierto"') + '>' +
       '<div class="txt">' +
         '<div class="l1">' + escapar(e.proyecto || 'Sin proyecto') +
           (e.caracteristicas ? ' · ' + escapar(e.caracteristicas) : '') + '</div>' +
         '<div class="l2">' + fechaCorta(e.fecha) + ' · ' +
           escapar(e.actividad || '—') + ' · ' + escapar(e.subactividad || '—') +
           ' · ' + escapar(e.cuadrilla || '—') +
-          ' · ' + hm(c.neto) + ' h netas' +
-          (e.cerrado ? '' : ' · <b>abierto</b>') + '</div>' +
+          ' · ' + hm(c.neto) + ' h netas</div>' +
       '</div>' +
-      '<div class="der">' +
-        (c.rendCuadrilla != null
-          ? '<div class="rend">' + fmt(c.rendCuadrilla, 3) +
-            '<small>h.cuadr/' + escapar(u) + '</small></div>'
-          : '<div class="rend sin">sin producción</div>') +
-      '</div>' +
-    '</li>';
-  }).join('');
+      '<div class="der"><div class="rend sin">' +
+        (e.cerrado ? 'falta producción' : 'abierto') + '</div></div>' +
+    '</li>'
+  ).join('');
 }
-
-/* ============================================================
-   Vista: Rendimientos
-
-   Un estudio suelto es una anécdota. El valor aparece al juntar varios de la
-   misma cuadrilla y la misma tarea: ahí se ve el promedio, cuánto varía, y
-   —lo que de verdad sirve para cotizar— cuánto del tiempo es montaje fijo y
-   cuánto crece con la cantidad.
-   ============================================================ */
 
 const LLAVES_GRUPO = {
   cas: e => [e.cuadrilla, e.actividad, e.subactividad],
@@ -1373,11 +1352,18 @@ function pintarRendimientos(){
   const modo = id('i-agrupar').value;
   const partes = LLAVES_GRUPO[modo] || LLAVES_GRUPO.cas;
 
-  /* Solo estudios que de verdad tienen un rendimiento. */
-  const utiles = vivos()
-    .filter(e => e.cerrado)
-    .map(e => ({ e, c:calcular(e) }))
-    .filter(x => x.c.rendCuadrilla != null);
+  const lista = estudiosFiltrados().map(e => ({ e, c:calcular(e) }));
+  const todos = vivos();
+
+  id('et-filtro').textContent = lista.length === todos.length
+    ? (todos.length + (todos.length === 1 ? ' estudio' : ' estudios'))
+    : (lista.length + ' de ' + todos.length);
+  id('b-excel-todos').disabled = lista.length === 0;
+
+  /* Los que de verdad tienen un rendimiento; el resto va a su propia lista. */
+  const sirve = x => x.e.cerrado && x.c.rendCuadrilla != null;
+  const utiles = lista.filter(sirve);
+  pintarFuera(lista.filter(x => !sirve(x)));
 
   const grupos = new Map();
   utiles.forEach(x => {
@@ -1395,8 +1381,13 @@ function pintarRendimientos(){
 
   if(!grupos.size){
     cont.innerHTML = '<div class="vacio-estado">' +
-      '<p class="t">Todavía no hay nada que promediar</p>' +
-      '<p>Hacen falta estudios terminados y con la producción medida.</p></div>';
+      '<p class="t">' + (todos.length ? 'Nada que promediar acá' : 'Todavía no hay estudios') + '</p>' +
+      '<p>' + (!todos.length
+        ? 'Arranque uno desde la pestaña Estudio.'
+        : (lista.length
+            ? 'Los que hay están abiertos o sin producción medida.'
+            : 'Nada coincide con el filtro. Pruebe con otro texto o limpie las fechas.')) +
+      '</p></div>';
     return;
   }
 
@@ -1537,13 +1528,6 @@ function pintarAjustes(){
   pintarEtiquetas('lista-elementos',
     (ajustes.elementos && ajustes.elementos[cuad]) || [], 'elementos',
     ' data-cuadrilla="' + escapar(cuad) + '"');
-
-  /* Estado de la nube, con el detalle completo. */
-  const d = Nube.describir();
-  id('nube-detalle').innerHTML =
-    '<p class="nota ' + d.tono + '">' + escapar(d.texto) + '</p>';
-
-  id('cuenta-local').textContent = vivos().length;
 }
 
 function agregarA(clave, valor, cuadrilla){
@@ -1583,7 +1567,9 @@ function quitarDe(clave, valor, cuadrilla){
    Pintar todo y cambiar de vista
    ============================================================ */
 
-const VISTAS = ['estudio', 'historial', 'rendimientos', 'ajustes'];
+/* Ajustes está en la lista pero no tiene pestaña: se llega por la tuerca de la
+   barra de arriba. Por eso el `if(pestaña)`. */
+const VISTAS = ['estudio', 'rendimientos', 'ajustes'];
 
 function verVista(v){
   if(VISTAS.indexOf(v) === -1) v = 'estudio';
@@ -1591,8 +1577,10 @@ function verVista(v){
   escribir(CLAVE_VISTA, v);
   VISTAS.forEach(x => {
     id('vista-' + x).hidden = x !== v;
-    id('tab-' + x).setAttribute('aria-selected', String(x === v));
+    const pestaña = id('tab-' + x);
+    if(pestaña) pestaña.setAttribute('aria-selected', String(x === v));
   });
+  id('b-ajustes').setAttribute('aria-pressed', String(v === 'ajustes'));
   window.scrollTo({ top:0, behavior:'smooth' });
   pintarTodo();
 }
@@ -1611,8 +1599,10 @@ function pintarTodo(){
   pintando = true;
   try{
     pintarNube();
+    /* La cuenta de la pestaña se ve desde cualquier vista, así que se
+       actualiza siempre, no solo cuando Rendimientos está a la vista. */
+    id('pill-rend').textContent = vivos().length;
     pintarEstudio();
-    pintarHistorial();
     if(vistaActual === 'rendimientos') pintarRendimientos();
     if(vistaActual === 'ajustes') pintarAjustes();
   } finally {
@@ -1715,7 +1705,6 @@ function conectar(){
     /* Se repinta solo lo que cambia: repintar todo mientras alguien escribe
        le movería el cursor. */
     pintarResultados(e, calcular(e));
-    pintarHistorial();
     sincronizarPronto();
   };
   id('i-produccion').addEventListener('input', guardarCierre);
@@ -1745,20 +1734,21 @@ function conectar(){
     toast('Estudio borrado');
   });
 
-  /* --- Historial --- */
+  /* --- Filtro de Rendimientos --- */
   ['i-buscar', 'i-desde', 'i-hasta'].forEach(x =>
-    id(x).addEventListener('input', pintarHistorial));
+    id(x).addEventListener('input', pintarRendimientos));
 
   id('b-limpiar-filtro').addEventListener('click', () => {
     id('i-buscar').value = '';
     id('i-desde').value = '';
     id('i-hasta').value = '';
-    pintarHistorial();
+    pintarRendimientos();
   });
 
   id('b-excel-todos').addEventListener('click', () => exportar(estudiosFiltrados()));
 
-  /* Abrir un estudio desde el historial o desde el detalle de un grupo. */
+  /* Abrir un estudio: desde el detalle de un grupo o desde los que todavía no
+     tienen rendimiento. */
   document.addEventListener('click', ev => {
     const fila = ev.target.closest('[data-est]');
     if(!fila) return;
@@ -1804,12 +1794,24 @@ function conectar(){
 
   id('i-cuadrilla-elem').addEventListener('change', pintarAjustes);
 
-  /* --- Nube --- */
-  id('b-sincronizar').addEventListener('click', () => Nube.sincronizar(false));
-  id('nube-punto').addEventListener('click', () => {
+  /* --- Ajustes y nube, arriba a la derecha ---
+     `antesDeAjustes` es a dónde volver: si estaba viendo Rendimientos y entra a
+     Ajustes, la flecha la devuelve a Rendimientos, no al Estudio. */
+  let antesDeAjustes = 'estudio';
+
+  id('b-ajustes').addEventListener('click', () => {
+    if(vistaActual === 'ajustes') return verVista(antesDeAjustes);
+    antesDeAjustes = vistaActual;
     verVista('ajustes');
-    Nube.sincronizar(false);
   });
+
+  id('b-salir-ajustes').addEventListener('click', () => verVista(antesDeAjustes));
+
+  /* El punto es el único mando de la sincronización: el color dice cómo va y
+     tocarlo la fuerza. No hace falta un botón aparte, y en el celular —donde
+     no hay mouse que pase por encima— tocarlo es además la manera de leer el
+     estado, porque el aviso sale en el mensajito de abajo. */
+  id('nube-punto').addEventListener('click', () => Nube.sincronizar(false));
 }
 
 /* ============================================================

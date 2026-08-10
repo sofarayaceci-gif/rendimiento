@@ -31,13 +31,19 @@
       <button type="button" class="punto" id="nube-punto"
               title="Se sincroniza sola al abrir la app."
               aria-label="Estado de la sincronización"></button>
+      <button type="button" class="icono-top" id="b-ajustes" aria-pressed="false"
+              title="Ajustes" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
     </div>
 
     <nav class="tabs" role="tablist" aria-label="Secciones">
       <button class="tab" role="tab" id="tab-estudio"      data-vista="estudio"      aria-selected="true">Estudio</button>
-      <button class="tab" role="tab" id="tab-historial"    data-vista="historial"    aria-selected="false">Historial <span class="pill" id="pill-hist">0</span></button>
-      <button class="tab" role="tab" id="tab-rendimientos" data-vista="rendimientos" aria-selected="false">Rendimientos</button>
-      <button class="tab" role="tab" id="tab-ajustes"      data-vista="ajustes"      aria-selected="false">Ajustes</button>
+      <button class="tab" role="tab" id="tab-rendimientos" data-vista="rendimientos" aria-selected="false">Rendimientos <span class="pill" id="pill-rend">0</span></button>
     </nav>
   </div>
 </header>
@@ -254,14 +260,15 @@
   </div>
 </section>
 
-<!-- ══════════════════ Vista: Historial ══════════════════ -->
-<section id="vista-historial" role="tabpanel" aria-labelledby="tab-historial" hidden>
+<!-- ══════════════════ Vista: Rendimientos ══════════════════ -->
+<section id="vista-rendimientos" role="tabpanel" aria-labelledby="tab-rendimientos" hidden>
+
   <div class="card">
-    <h2>Buscar</h2>
+    <h2>Qué se mira <span class="et" id="et-filtro"></span></h2>
     <div class="card-body">
       <div class="campos">
         <div class="campo ancho">
-          <label for="i-buscar">Proyecto, actividad, cuadrilla…</label>
+          <label for="i-buscar">Buscar por proyecto, actividad, cuadrilla…</label>
           <input type="text" id="i-buscar" placeholder="VN-L.14, Formaleta, Colado…" autocomplete="off">
         </div>
         <div class="campo">
@@ -272,6 +279,15 @@
           <label for="i-hasta">Hasta</label>
           <input type="date" id="i-hasta">
         </div>
+        <div class="campo ancho">
+          <label for="i-agrupar">Juntar los estudios por</label>
+          <select id="i-agrupar">
+            <option value="cas">Cuadrilla · Actividad · Sub-actividad</option>
+            <option value="cs">Cuadrilla · Sub-actividad</option>
+            <option value="as">Actividad · Sub-actividad</option>
+            <option value="c">Cuadrilla</option>
+          </select>
+        </div>
       </div>
       <div class="fila-btns" style="margin-top:13px">
         <button type="button" class="btn" id="b-limpiar-filtro">Limpiar</button>
@@ -281,40 +297,35 @@
   </div>
 
   <div class="card">
-    <h2>Estudios <span class="et" id="et-historial"></span></h2>
-    <ul class="lista-est" id="lista-historial"></ul>
-  </div>
-</section>
-
-<!-- ══════════════════ Vista: Rendimientos ══════════════════ -->
-<section id="vista-rendimientos" role="tabpanel" aria-labelledby="tab-rendimientos" hidden>
-  <div class="card">
-    <h2>Cómo se agrupa</h2>
-    <div class="card-body">
-      <div class="campo">
-        <label for="i-agrupar">Juntar los estudios por</label>
-        <select id="i-agrupar">
-          <option value="cas">Cuadrilla · Actividad · Sub-actividad</option>
-          <option value="cs">Cuadrilla · Sub-actividad</option>
-          <option value="as">Actividad · Sub-actividad</option>
-          <option value="c">Cuadrilla</option>
-        </select>
-      </div>
-      <p class="nota" style="margin-top:12px">
-        Solo entran los estudios <b>cerrados y con producción medida</b>: sin
-        producción no hay rendimiento que calcular.
-      </p>
-    </div>
-  </div>
-
-  <div class="card">
     <h2>Rendimiento por grupo <span class="et" id="et-rend"></span></h2>
     <div id="lista-rendimientos"></div>
+  </div>
+
+  <!-- Los que no se pueden promediar. Sin esta lista quedarían inalcanzables:
+       un estudio que cerró sin anotar la producción no aparecería en ningún
+       grupo y no habría forma de volver a abrirlo. -->
+  <div class="card" id="card-fuera" hidden>
+    <h2>Todavía sin rendimiento <span class="et" id="et-fuera"></span></h2>
+    <ul class="lista-est" id="lista-fuera"></ul>
+    <div class="card-body" style="border-top:1px solid var(--g100)">
+      <p class="ayuda" style="margin:0">
+        No entran en los promedios porque están abiertos o porque les falta la
+        producción medida. Tóquelos para terminarlos.
+      </p>
+    </div>
   </div>
 </section>
 
 <!-- ══════════════════ Vista: Ajustes ══════════════════ -->
-<section id="vista-ajustes" role="tabpanel" aria-labelledby="tab-ajustes" hidden>
+<section id="vista-ajustes" role="tabpanel" aria-labelledby="b-ajustes" hidden>
+
+  <!-- Ajustes no tiene pestaña, así que necesita su propia salida: sin esto
+       hay que acordarse de que se sale por la misma tuerca por la que se entró. -->
+  <div class="cabecera-vista">
+    <button type="button" class="icono-btn" id="b-salir-ajustes"
+            title="Volver" aria-label="Salir de Ajustes">←</button>
+    <h2>Ajustes</h2>
+  </div>
 
   <div class="card">
     <h2>Cuadrillas</h2>
@@ -381,30 +392,6 @@
     </div>
   </div>
 
-  <div class="card">
-    <h2>Sincronización</h2>
-    <div class="card-body">
-      <div id="nube-detalle"></div>
-      <div class="fila-btns" style="margin-top:13px">
-        <button type="button" class="btn" id="b-sincronizar">Sincronizar ahora</button>
-      </div>
-      <p class="ayuda" style="margin-top:12px">
-        Los estudios se ven en todos los dispositivos. La app funciona completa
-        sin señal: guarda todo en el aparato y empareja con la nube cuando hay
-        internet. El respaldo de verdad es el Excel exportado.
-      </p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Esta app</h2>
-    <div class="card-body">
-      <p class="ayuda" style="margin-bottom:0">
-        Rendimientos · Adelante Desarrollos · <span id="version-app">v1</span><br>
-        Guardado en este aparato: <b id="cuenta-local">0</b> estudios.
-      </p>
-    </div>
-  </div>
 </section>
 
 </main>

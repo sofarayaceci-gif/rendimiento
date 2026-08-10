@@ -121,23 +121,49 @@ forma no.
 
 ---
 
-## Las tres pestañas además de Estudio
+## La pestaña Rendimientos
 
-**Historial** — todos los estudios, con buscador por texto y por fechas.
-Tocando uno se abre. De acá sale el Excel de varios estudios de una vez.
+Empezó siendo dos pantallas —un historial con la lista de estudios y un
+rendimientos con los promedios— y terminó siendo una sola, porque enseñaban los
+mismos estudios con dos caras y obligaban a saltar de una a otra. Tiene tres
+partes, de arriba abajo:
 
-**Rendimientos** — junta los estudios por cuadrilla, actividad y sub-actividad
-—o como se escoja— y saca el promedio, el modelo de montaje + variable, y
-cuánto se separan el mejor y el peor. Solo entran los estudios **cerrados y con
-producción medida**: sin producción no hay rendimiento que calcular. El promedio
-va **ponderado por producción**, no promedio de promedios: un estudio de 80 m²
-dice más que uno de 5.
+**El filtro.** Buscador por proyecto, actividad o cuadrilla, y un rango de
+fechas. Manda sobre todo lo de abajo, incluido el botón de **Exportar a Excel**,
+que baja exactamente los estudios que estén filtrados en ese momento.
 
-**Ajustes** — las listas. Cuadrillas, actividades, sub-actividades, unidades y
+**Rendimiento por grupo.** Junta los estudios del mismo trabajo —cuadrilla,
+actividad y sub-actividad, o como se escoja en el desplegable— y de cada grupo
+saca el rendimiento promedio, el modelo de montaje + variable y cuánto se
+separan el mejor y el peor. Es la respuesta a *«¿cuánto se tarda normalmente en
+esto?»*, que es la pregunta para cotizar.
+
+Abriendo un grupo está el detalle: **una fila por estudio, con su fecha**,
+proyecto, producción, tiempo neto, personas y rendimiento. Tocando una fila se
+abre ese estudio completo, con todas sus lecturas, para revisarlo o corregirlo.
+
+El promedio va **ponderado por producción**, no promedio de promedios: un
+estudio de 80 m² dice más que uno de 5.
+
+**Todavía sin rendimiento.** Los que no se pueden promediar: los que están
+abiertos y los que cerraron sin anotar la producción. Aparecen solo cuando hay
+alguno, con su fecha y el motivo al lado, y también se abren tocándolos. Están
+ahí a propósito: sin esa lista un estudio que cerró sin medir la producción no
+saldría en ningún grupo y no habría manera de volver a abrirlo para terminarlo.
+
+## Ajustes, en la tuerca de arriba
+
+No tiene pestaña: está en el icono de tuerca de la barra, a la par del punto de
+sincronización, y se sale con la **flecha de volver** que está arriba a la
+izquierda —que devuelve a la pantalla desde la que se entró— o tocando la tuerca
+otra vez. Son listas que se tocan de vez en cuando, no todos los días, y así el
+espacio de arriba queda para lo que sí se usa en obra.
+
+Ahí van las cuadrillas, las actividades, las sub-actividades, las unidades y los
 **elementos por cuadrilla**: las tareas que se ofrecen al marcar una lectura,
 amarradas a la cuadrilla para que en un estudio de formaleta no salga la lista
-de pintura. Todo se puede escribir a mano igual; lo que se escribe se guarda
-solo para la próxima vez.
+de pintura. Nada de esto es obligatorio — todos los campos se pueden escribir a
+mano igual, y lo que se escribe queda guardado solo para la próxima vez.
 
 Las listas también viajan a los demás aparatos: una cuadrilla agregada en la
 compu queda puesta en el celular de quien anda en obra.
@@ -218,9 +244,11 @@ en rojo y dice *«Falta la tabla en Supabase»*.
   nube cuando hay señal.
 - **Se sincroniza sola**, sin botón: al abrir, cada 20 segundos mientras la
   pestaña esté a la vista, después de cada cambio y cuando vuelve la conexión.
-- El estado se ve en el **punto de color** de la barra de arriba. Verde es al
-  día, verde parpadeando es sincronizando, rojo es que algo falló y gris es que
-  todavía no ha sincronizado. Tocándolo se abre el detalle en Ajustes.
+- Todo el mando es el **punto de color** de la barra de arriba. Verde es al día,
+  verde parpadeando es sincronizando, rojo es que algo falló y gris es que
+  todavía no ha sincronizado. **Tocándolo se fuerza una sincronización** y sale
+  abajo el mensaje con cómo fue — que en el celular es además la manera de leer
+  el estado, porque no hay mouse que pase por encima del punto.
 - Al juntar las dos listas gana, estudio por estudio, la versión **tocada más
   recientemente**.
 - **Borrar borra en todos lados.** La fila no se elimina: se marca como borrada

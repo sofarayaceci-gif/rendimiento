@@ -9,7 +9,7 @@
    Sin eso, un aparato que ya tenga la app instalada puede seguir
    días con la versión vieja. Ver README.md.
    ============================================================ */
-const CACHE = 'rendimientos-v1';
+const CACHE = 'rendimientos-v3';
 
 const ARCHIVOS = [
   '.',
