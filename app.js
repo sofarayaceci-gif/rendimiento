@@ -1015,22 +1015,52 @@ function marcarLectura(e, tipoInicial){
   });
 }
 
+/* Terminar pide la hora en vez de dar por hecho que es «ahora».
+
+   Es el único momento del estudio donde uno casi nunca toca el botón justo
+   cuando pasa la cosa: la cuadrilla termina, uno mide, conversa, y se acuerda
+   diez minutos después. En las lecturas no hace falta porque la ventanita que
+   sale ya trae el campo de hora; acá antes solo había un «¿seguro?» y había
+   que ir a buscar el último tramo para corregirlo. */
 function terminarEstudio(e){
   const corriendo = (e.tramos || []).find(t => !t.hasta);
   if(!corriendo){ e.cerrado = true; tocar(e); return; }
 
-  const t = ahora();
-  if(new Date(t) <= new Date(corriendo.desde)){
-    toast('La hora de fin tiene que ser posterior al último tramo.');
-    return;
-  }
-  corriendo.hasta = t;
-  e.cerrado = true;
-  tocar(e);
+  Hoja.abrir({
+    titulo: 'Terminar estudio',
+    cuerpo:
+      '<p class="nota" style="margin-bottom:13px">Se cierra el último tramo, ' +
+      '<b>' + escapar(corriendo.descripcion || 'sin describir') + '</b>, que ' +
+      'viene corriendo desde las <b>' + horaDe(corriendo.desde) + '</b>.</p>' +
+      campoHora('h-fin', 'Hora en que terminaron', horaDe(ahora()),
+        'Viene puesta la hora de ahora. Si terminaron hace rato, corríjala acá.'),
+    textoGuardar: 'Terminar',
+    guardar(){
+      const fin = conHora(corriendo.desde, id('h-fin').value);
+      if(!fin) return 'La hora no es válida.';
+      if(new Date(fin) <= new Date(corriendo.desde)){
+        return 'Tiene que ser después de las <b>' + horaDe(corriendo.desde) +
+               '</b>, que fue la última lectura.';
+      }
+      if(new Date(fin) > new Date()){
+        return 'Las <b>' + horaDe(fin) + '</b> todavía no han llegado: son las <b>' +
+               horaDe(ahora()) + '</b>.';
+      }
 
-  toast('Estudio terminado · anote la producción');
-  id('i-produccion').focus();
-  subirALaVista(id('i-produccion').closest('.campo'));
+      corriendo.hasta = fin;
+      e.cerrado = true;
+      tocar(e);
+
+      /* Después de que la hoja se cierre, para que el foco no se pierda. */
+      setTimeout(() => {
+        toast('Estudio terminado · anote la producción');
+        const campo = id('i-produccion');
+        campo.focus();
+        subirALaVista(campo.closest('.campo'));
+      }, 0);
+      return null;
+    }
+  });
 }
 
 function reabrirEstudio(e){
@@ -1669,11 +1699,11 @@ function conectar(){
     if(e) marcarLectura(e, 'Externo');
   });
 
+  /* Sin `confirm`: la hoja que pide la hora ya es la confirmación, y de paso
+     enseña qué se va a guardar antes de guardarlo. */
   id('b-terminar').addEventListener('click', () => {
     const e = estudioActivo();
-    if(!e) return;
-    if(!confirm('¿Terminar el estudio? Se cierra el tramo que va corriendo.')) return;
-    terminarEstudio(e);
+    if(e) terminarEstudio(e);
   });
 
   id('b-agregar-lectura').addEventListener('click', () => {

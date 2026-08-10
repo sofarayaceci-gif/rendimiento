@@ -232,7 +232,7 @@ const Excel = (() => {
      hasta la fila 6, la tabla de lecturas desde la 7, y el bloque del estudio
      de tiempos dos filas más abajo de la última lectura.                    */
 
-  function hojaEstudio(e, c){
+  function hojaEstudio(e, c, primera){
     const filas = [];
     const merges = [];
 
@@ -368,7 +368,7 @@ const Excel = (() => {
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<sheetViews><sheetView showGridLines="0" workbookViewId="0"/></sheetViews>
+<sheetViews><sheetView${primera ? ' tabSelected="1"' : ''} showGridLines="0" workbookViewId="0"/></sheetViews>
 <sheetFormatPr defaultRowHeight="15"/>
 <cols>${anchos}</cols>
 <sheetData>${filas.join('')}</sheetData>
@@ -429,7 +429,7 @@ const Excel = (() => {
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<sheetViews><sheetView tabSelected="1" showGridLines="0" workbookViewId="0">
+<sheetViews><sheetView showGridLines="0" workbookViewId="0">
 <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>
 </sheetView></sheetViews>
 <sheetFormatPr defaultRowHeight="15"/>
@@ -466,11 +466,18 @@ const Excel = (() => {
     const nombres = nombresDeHoja(lista);
     const hojas = [];
 
-    /* Hoja 1: el resumen. Después una por estudio. */
-    hojas.push({ nombre:'Resumen', contenido:hojaResumen(lista, calcular) });
+    /* Primero las hojas de los estudios, y el archivo abre en la primera de
+       ellas. Es la hoja que la gente ya conoce —la misma forma del Excel de
+       siempre—, así que es la que tiene que aparecer al abrir el archivo.
+
+       El «Resumen» va al final y solo cuando hay más de un estudio: con uno
+       solo sería una tabla de una fila, que no le sirve a nadie. */
     lista.forEach((e, i) => {
-      hojas.push({ nombre:nombres[i], contenido:hojaEstudio(e, calcular(e)) });
+      hojas.push({ nombre:nombres[i], contenido:hojaEstudio(e, calcular(e), i === 0) });
     });
+    if(lista.length > 1){
+      hojas.push({ nombre:'Resumen', contenido:hojaResumen(lista, calcular) });
+    }
 
     const overrides = hojas.map((h, i) =>
       '<Override PartName="/xl/worksheets/sheet' + (i + 1) +

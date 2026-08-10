@@ -23,7 +23,11 @@ Los tres botones de la pantalla:
 |---|---|
 | **Nueva lectura** | Cambiaron de tarea. Es el botón grande, el que se toca sin mirar. |
 | **Interrupción** | Lo mismo, pero el tramo nace ya marcado como **Externo**. Es el caso más frecuente —llegó tarde el material, empezó a llover— y así es un toque en vez de tres. |
-| **Terminar estudio** | Cierra el tramo que va corriendo y pide la producción medida. |
+| **Terminar estudio** | Pide la hora en que terminaron —ya puesta con la de ahora, corregible—, cierra el tramo que va corriendo y pasa a la producción medida. |
+
+Lo de pedir la hora al terminar no es un trámite: es el único momento del
+estudio donde uno casi nunca toca el botón justo cuando pasa la cosa. La
+cuadrilla termina, uno mide, conversa, y se acuerda diez minutos después.
 
 Al final se anota **cuánto se produjo** y en qué unidad, y ahí sale el
 rendimiento.
@@ -278,12 +282,15 @@ archivo de la app.
 
 **Exportar a Excel** genera un `.xlsx` de verdad, sin librerías. Trae:
 
-- una hoja **Resumen** con una fila por estudio —fecha, encabezado, tiempos,
-  rendimientos, horas hombre— con filtro puesto y la primera fila inmovilizada,
-  para tabla dinámica;
 - **una hoja por estudio**, con la misma forma de la hoja «Plantilla»: los
   mismos rótulos, las mismas filas y el mismo orden, y los tiempos en
-  `horas:minutos`.
+  `horas:minutos`. Van **de primero**, y el archivo abre en la primera de
+  ellas: es la hoja que la gente ya conoce, así que es la que tiene que
+  aparecer al abrirlo. Cada una se llama como el proyecto;
+- una hoja **Resumen** con una fila por estudio —fecha, encabezado, tiempos,
+  rendimientos, horas hombre— con filtro puesto y la primera fila inmovilizada,
+  para tabla dinámica. Va **al final**, y solo aparece cuando se exporta más de
+  un estudio: con uno solo sería una tabla de una fila.
 
 Los colores son **blanco** en los datos, **gris `#D9D9D9`** en los rótulos de la
 izquierda —el mismo del Excel original— y **verde `#ADD010`**, el institucional,
