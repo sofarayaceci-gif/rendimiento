@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Estudios de tiempos en obra: lecturas con cronómetro y rendimiento por cuadrilla.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icono-192.png">
+<link rel="apple-touch-icon" href="icono-192.png">
+<link rel="stylesheet" href="styles.css">
+<title>Rendimientos — Adelante Desarrollos</title>
+</head>
+<body>
+
+<!-- ══════════════════ Barra de arriba ══════════════════ -->
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13.5" r="7.5"/>
+          <path d="M12 9.5v4l2.6 2.6M9.6 2.5h4.8"/>
+        </svg>
+      </span>
+      <div class="marca-txt">
+        <h1>Rendimientos</h1>
+        <p>Adelante Desarrollos · estudios de tiempos</p>
+      </div>
+      <button type="button" class="punto" id="nube-punto"
+              title="Se sincroniza sola al abrir la app."
+              aria-label="Estado de la sincronización"></button>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" id="tab-estudio"      data-vista="estudio"      aria-selected="true">Estudio</button>
+      <button class="tab" role="tab" id="tab-historial"    data-vista="historial"    aria-selected="false">Historial <span class="pill" id="pill-hist">0</span></button>
+      <button class="tab" role="tab" id="tab-rendimientos" data-vista="rendimientos" aria-selected="false">Rendimientos</button>
+      <button class="tab" role="tab" id="tab-ajustes"      data-vista="ajustes"      aria-selected="false">Ajustes</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<p class="nota error" id="sin-storage" hidden>
+  <b>Este navegador no está guardando nada.</b> Puede ser que esté en una ventana
+  de incógnito o que no tenga espacio. Lo que anote se pierde al cerrar: exporte
+  el Excel antes de salir.
+</p>
+
+<!-- ══════════════════ Vista: Estudio ══════════════════ -->
+<section id="vista-estudio" role="tabpanel" aria-labelledby="tab-estudio">
+
+  <!-- Tira de estudios abiertos, solo cuando hay más de uno -->
+  <div class="tira" id="tira-abiertos" hidden></div>
+
+  <!-- ── Estudio nuevo ── -->
+  <div class="card" id="card-nuevo">
+    <h2>Estudio nuevo <span class="et" id="et-nuevo"></span></h2>
+    <div class="card-body">
+      <div class="campos">
+
+        <div class="campo ancho">
+          <label for="i-proyecto">Proyecto</label>
+          <div class="combo" id="combo-proyecto">
+            <input class="combo-input" type="text" id="i-proyecto" autocomplete="off"
+                   placeholder="VN-L.14" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="lista-proyecto">
+            <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+            <span class="combo-flecha" aria-hidden="true">▾</span>
+            <ul class="combo-list" id="lista-proyecto" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="campo ancho">
+          <label for="i-caract">Características</label>
+          <div class="combo" id="combo-caract">
+            <input class="combo-input" type="text" id="i-caract" autocomplete="off"
+                   placeholder="Gyro A - 2N-Azotea" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="lista-caract">
+            <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+            <span class="combo-flecha" aria-hidden="true">▾</span>
+            <ul class="combo-list" id="lista-caract" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="i-actividad">Actividad</label>
+          <div class="combo" id="combo-actividad">
+            <input class="combo-input" type="text" id="i-actividad" autocomplete="off"
+                   placeholder="Muros N2" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="lista-actividad">
+            <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+            <span class="combo-flecha" aria-hidden="true">▾</span>
+            <ul class="combo-list" id="lista-actividad" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="i-subactividad">Sub-actividad</label>
+          <div class="combo" id="combo-subactividad">
+            <input class="combo-input" type="text" id="i-subactividad" autocomplete="off"
+                   placeholder="Colado" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="lista-subactividad">
+            <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+            <span class="combo-flecha" aria-hidden="true">▾</span>
+            <ul class="combo-list" id="lista-subactividad" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="i-cuadrilla">Cuadrilla</label>
+          <div class="combo" id="combo-cuadrilla">
+            <input class="combo-input" type="text" id="i-cuadrilla" autocomplete="off"
+                   placeholder="Formaleta" role="combobox" aria-expanded="false"
+                   aria-autocomplete="list" aria-controls="lista-cuadrilla">
+            <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+            <span class="combo-flecha" aria-hidden="true">▾</span>
+            <ul class="combo-list" id="lista-cuadrilla" role="listbox" hidden></ul>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="i-personas">Personas en la cuadrilla</label>
+          <div class="con-unidad">
+            <input type="number" id="i-personas" min="1" max="60" step="1" inputmode="numeric" placeholder="4">
+            <span class="u">personas</span>
+          </div>
+          <span class="ayuda">Las que están en el momento. Si durante el estudio
+            entra o sale gente, se cambia en la lectura donde cambió.</span>
+        </div>
+
+        <div class="campo">
+          <label for="i-fecha">Fecha</label>
+          <input type="date" id="i-fecha">
+        </div>
+
+        <div class="campo">
+          <label for="i-inicio">Hora de inicio</label>
+          <input type="time" id="i-inicio">
+          <span class="ayuda">Viene con la hora de ahora. Se puede corregir después.</span>
+        </div>
+
+      </div>
+
+      <div id="aviso-nuevo"></div>
+
+      <div class="fila-btns" style="margin-top:15px">
+        <button type="button" class="btn btn-verde" id="b-iniciar">Iniciar estudio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Estudio en curso ── -->
+  <div id="estudio-activo" hidden>
+
+    <div class="card">
+      <div class="resumen-enc">
+        <div class="txt">
+          <div class="p1" id="enc-p1">—</div>
+          <div class="p2" id="enc-p2"></div>
+        </div>
+        <button type="button" class="icono-btn" id="b-editar-enc" title="Cambiar el encabezado" aria-label="Cambiar el encabezado">✎</button>
+      </div>
+    </div>
+
+    <div class="dos-col">
+      <div>
+
+        <div class="card">
+          <div class="reloj">
+            <div class="total" id="reloj-total">0:00<small>h</small></div>
+            <div class="desde" id="reloj-desde"></div>
+          </div>
+
+          <div class="actual" id="actual">
+            <div class="txt">
+              <div class="et">Ahora mismo</div>
+              <div class="nom" id="actual-nom">—</div>
+            </div>
+            <div class="cro" id="actual-cro">0:00</div>
+          </div>
+
+          <div class="card-body" style="border-top:0">
+            <button type="button" class="btn-marcar" id="b-lectura">
+              Nueva lectura
+              <small>Cambiaron de tarea</small>
+            </button>
+            <div class="fila-btns" style="margin-top:9px">
+              <button type="button" class="btn btn-ambar" id="b-interrupcion">Interrupción</button>
+              <button type="button" class="btn" id="b-terminar">Terminar estudio</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Lecturas <span class="et" id="et-lecturas"></span></h2>
+          <ul class="tramos" id="lista-tramos"></ul>
+          <div class="card-body" style="border-top:1px solid var(--g100)">
+            <button type="button" class="btn btn-chico btn-plano" id="b-agregar-lectura">
+              + Agregar una lectura que se pasó
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+
+        <div class="card">
+          <h2>Cierre del estudio</h2>
+          <div class="card-body">
+            <div class="campos">
+              <div class="campo">
+                <label for="i-produccion">Producción medida</label>
+                <input type="number" id="i-produccion" min="0" step="any" inputmode="decimal" placeholder="40">
+              </div>
+              <div class="campo">
+                <label for="i-unidad">Unidad</label>
+                <div class="combo" id="combo-unidad">
+                  <input class="combo-input" type="text" id="i-unidad" autocomplete="off"
+                         placeholder="m²" role="combobox" aria-expanded="false"
+                         aria-autocomplete="list" aria-controls="lista-unidad">
+                  <button type="button" class="combo-clear" tabindex="-1" aria-label="Borrar">&times;</button>
+                  <span class="combo-flecha" aria-hidden="true">▾</span>
+                  <ul class="combo-list" id="lista-unidad" role="listbox" hidden></ul>
+                </div>
+              </div>
+              <div class="campo ancho">
+                <label for="i-nota">Nota del estudio</label>
+                <textarea id="i-nota" rows="2" placeholder="Lo que haya que aclarar"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Estudio de tiempos</h2>
+          <table class="tabla-res" id="tabla-resultados"></table>
+          <div id="rend-caja"></div>
+          <div class="card-body" id="avisos-estudio"></div>
+          <div class="card-body" style="border-top:1px solid var(--g100)">
+            <div class="fila-btns">
+              <button type="button" class="btn" id="b-excel-uno">Exportar a Excel</button>
+              <button type="button" class="btn btn-rojo btn-chico" id="b-borrar-estudio">Borrar estudio</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ Vista: Historial ══════════════════ -->
+<section id="vista-historial" role="tabpanel" aria-labelledby="tab-historial" hidden>
+  <div class="card">
+    <h2>Buscar</h2>
+    <div class="card-body">
+      <div class="campos">
+        <div class="campo ancho">
+          <label for="i-buscar">Proyecto, actividad, cuadrilla…</label>
+          <input type="text" id="i-buscar" placeholder="VN-L.14, Formaleta, Colado…" autocomplete="off">
+        </div>
+        <div class="campo">
+          <label for="i-desde">Desde</label>
+          <input type="date" id="i-desde">
+        </div>
+        <div class="campo">
+          <label for="i-hasta">Hasta</label>
+          <input type="date" id="i-hasta">
+        </div>
+      </div>
+      <div class="fila-btns" style="margin-top:13px">
+        <button type="button" class="btn" id="b-limpiar-filtro">Limpiar</button>
+        <button type="button" class="btn btn-verde" id="b-excel-todos">Exportar a Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Estudios <span class="et" id="et-historial"></span></h2>
+    <ul class="lista-est" id="lista-historial"></ul>
+  </div>
+</section>
+
+<!-- ══════════════════ Vista: Rendimientos ══════════════════ -->
+<section id="vista-rendimientos" role="tabpanel" aria-labelledby="tab-rendimientos" hidden>
+  <div class="card">
+    <h2>Cómo se agrupa</h2>
+    <div class="card-body">
+      <div class="campo">
+        <label for="i-agrupar">Juntar los estudios por</label>
+        <select id="i-agrupar">
+          <option value="cas">Cuadrilla · Actividad · Sub-actividad</option>
+          <option value="cs">Cuadrilla · Sub-actividad</option>
+          <option value="as">Actividad · Sub-actividad</option>
+          <option value="c">Cuadrilla</option>
+        </select>
+      </div>
+      <p class="nota" style="margin-top:12px">
+        Solo entran los estudios <b>cerrados y con producción medida</b>: sin
+        producción no hay rendimiento que calcular.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Rendimiento por grupo <span class="et" id="et-rend"></span></h2>
+    <div id="lista-rendimientos"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ Vista: Ajustes ══════════════════ -->
+<section id="vista-ajustes" role="tabpanel" aria-labelledby="tab-ajustes" hidden>
+
+  <div class="card">
+    <h2>Cuadrillas</h2>
+    <div class="card-body">
+      <p class="ayuda" style="margin-bottom:0">Las que salen en el desplegable al abrir un estudio.</p>
+      <div class="etiquetas" id="lista-cuadrillas"></div>
+      <div class="agregar">
+        <input type="text" id="i-nueva-cuadrilla" placeholder="Nombre de la cuadrilla" autocomplete="off">
+        <button type="button" class="btn btn-chico" data-agregar="cuadrillas">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Elementos por cuadrilla</h2>
+    <div class="card-body">
+      <p class="ayuda" style="margin-bottom:0">
+        Las tareas que se ofrecen al marcar una lectura. Van por cuadrilla, para
+        que en un estudio de formaleta no salga la lista de pintura. Siempre se
+        puede escribir una que no esté en la lista.
+      </p>
+      <div class="campo" style="margin-top:12px">
+        <label for="i-cuadrilla-elem">Cuadrilla</label>
+        <select id="i-cuadrilla-elem"></select>
+      </div>
+      <div class="etiquetas" id="lista-elementos"></div>
+      <div class="agregar">
+        <input type="text" id="i-nuevo-elemento" placeholder="Acomodo telescópica" autocomplete="off">
+        <button type="button" class="btn btn-chico" data-agregar="elementos">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Actividades</h2>
+    <div class="card-body">
+      <div class="etiquetas" id="lista-actividades"></div>
+      <div class="agregar">
+        <input type="text" id="i-nueva-actividad" placeholder="Muros N2" autocomplete="off">
+        <button type="button" class="btn btn-chico" data-agregar="actividades">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sub-actividades</h2>
+    <div class="card-body">
+      <div class="etiquetas" id="lista-subactividades"></div>
+      <div class="agregar">
+        <input type="text" id="i-nueva-subactividad" placeholder="Colado" autocomplete="off">
+        <button type="button" class="btn btn-chico" data-agregar="subactividades">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Unidades de producción</h2>
+    <div class="card-body">
+      <div class="etiquetas" id="lista-unidades"></div>
+      <div class="agregar">
+        <input type="text" id="i-nueva-unidad" placeholder="m²" autocomplete="off">
+        <button type="button" class="btn btn-chico" data-agregar="unidades">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sincronización</h2>
+    <div class="card-body">
+      <div id="nube-detalle"></div>
+      <div class="fila-btns" style="margin-top:13px">
+        <button type="button" class="btn" id="b-sincronizar">Sincronizar ahora</button>
+      </div>
+      <p class="ayuda" style="margin-top:12px">
+        Los estudios se ven en todos los dispositivos. La app funciona completa
+        sin señal: guarda todo en el aparato y empareja con la nube cuando hay
+        internet. El respaldo de verdad es el Excel exportado.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Esta app</h2>
+    <div class="card-body">
+      <p class="ayuda" style="margin-bottom:0">
+        Rendimientos · Adelante Desarrollos · <span id="version-app">v1</span><br>
+        Guardado en este aparato: <b id="cuenta-local">0</b> estudios.
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════ Hoja modal ══════════════════ -->
+<div class="velo" id="velo" hidden>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="hoja-titulo">
+    <div class="hoja-top">
+      <h3 id="hoja-titulo">—</h3>
+      <button type="button" class="icono-btn" id="b-cerrar-hoja" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="hoja-cuerpo" id="hoja-cuerpo"></div>
+    <div class="hoja-pie" id="hoja-pie"></div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="nube.js"></script>
+<script src="excel.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

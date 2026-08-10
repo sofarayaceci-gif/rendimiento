@@ -1,0 +1,16 @@
+# Windows
+Thumbs.db
+desktop.ini
+*.lnk
+
+# Editores
+.vscode/
+.idea/
+
+# Claude Code
+.claude/settings.local.json
+
+# Excel exportado desde la app: son datos, no codigo
+Rendimientos*.xlsx
+Rendimiento*.xlsx
+~$*.xlsx

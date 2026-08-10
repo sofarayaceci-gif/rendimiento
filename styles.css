@@ -1,0 +1,612 @@
+/* ============================================================
+   Rendimientos — Adelante Desarrollos
+   Verde institucional #add010 sobre blanco. Móvil primero:
+   esto se usa parado en una obra, con una mano y con sol.
+   ============================================================ */
+
+:root{
+  --verde:#add010;
+  --verde-h:#9bbb0e;
+  --verde-t:#4f6100;      /* verde para texto: contrasta sobre blanco */
+  --verde-bg:#f4f9e0;
+  --verde-bd:#dbe9a8;
+
+  --blanco:#ffffff;
+  --g50:#f7f8f5;
+  --g100:#eff1eb;
+  --g200:#e3e6dd;
+  --g300:#cbcfc4;
+  --g400:#a7ada1;
+  --g500:#7b8078;
+  --g700:#43473f;
+  --g900:#1b1d19;
+
+  --rojo:#b53228;
+  --rojo-bg:#fdf1f0;
+  --rojo-bd:#f2d5d2;
+  --ambar:#8a5a00;
+  --ambar-bg:#fdf6e6;
+  --ambar-bd:#f0dfb8;
+  --azul:#2b6a8f;
+  --azul-bg:#eef6fa;
+
+  --radio:12px;
+  --sombra:0 1px 2px rgba(27,29,25,.05), 0 1px 3px rgba(27,29,25,.06);
+  --sombra-alta:0 12px 32px rgba(27,29,25,.16);
+  --trans:.14s ease;
+
+  /* Lo que mide la barra de arriba. Lo usa el scroll-margin de los campos y
+     el cálculo del alto de los desplegables. */
+  --top:104px;
+}
+
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+
+body{
+  margin:0;
+  background:var(--g50);
+  color:var(--g900);
+  font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input,select,textarea{ font:inherit; color:inherit; }
+h1,h2,h3,p,ul,ol{ margin:0; }
+ul,ol{ padding:0; list-style:none; }
+
+.oculto{ display:none !important; }
+.solo-lectura{ pointer-events:none; opacity:.55; }
+
+/* ============================================================
+   Barra de arriba
+   ============================================================ */
+
+.topbar{
+  position:sticky; top:0; z-index:30;
+  background:var(--blanco);
+  border-bottom:1px solid var(--g200);
+  padding-top:env(safe-area-inset-top);
+}
+.topbar-in{
+  max-width:1120px; margin:0 auto;
+  padding:10px 16px 0;
+  display:flex; flex-direction:column; gap:8px;
+}
+.marca{ display:flex; align-items:center; gap:10px; }
+.logo{
+  width:32px; height:32px; flex:none; border-radius:9px;
+  background:var(--verde); display:grid; place-items:center;
+}
+.logo svg{ width:20px; height:20px; }
+.marca-txt{ min-width:0; flex:1; }
+.marca h1{ font-size:15.5px; font-weight:650; letter-spacing:-.01em; line-height:1.2; }
+.marca p{ font-size:11.5px; color:var(--g500); }
+
+/* Estado de la sincronización: solo el color. Lo que significa va en el
+   title, que sale al pasar el mouse y es lo que lee un lector de pantalla. */
+.punto{
+  width:10px; height:10px; flex:none; border:0; padding:0;
+  border-radius:50%; background:var(--g300);
+  transition:background .25s; cursor:pointer;
+}
+.punto.bien{ background:var(--verde); }
+.punto.mal{ background:var(--rojo); }
+.punto.trabajando{ background:var(--verde); animation:latido 1s ease-in-out infinite; }
+@keyframes latido{ 50%{ opacity:.2; } }
+
+.tabs{ display:flex; overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar{ display:none; }
+.tab{
+  appearance:none; border:0; background:none; cursor:pointer; white-space:nowrap;
+  padding:9px 2px; margin-right:20px; min-height:40px;
+  font-size:14px; font-weight:550; color:var(--g500);
+  border-bottom:2.5px solid transparent; transition:color var(--trans);
+}
+.tab[aria-selected="true"]{ color:var(--g900); border-bottom-color:var(--verde); }
+.pill{
+  display:inline-block; margin-left:5px; padding:1px 7px; border-radius:999px;
+  background:var(--g100); color:var(--g500);
+  font-size:11px; font-weight:600; vertical-align:1px;
+}
+.tab[aria-selected="true"] .pill{ background:var(--verde-bg); color:var(--verde-t); }
+
+/* ============================================================
+   Estructura
+   ============================================================ */
+
+main{ max-width:1120px; margin:0 auto; padding:16px 16px 96px; }
+
+.card{
+  background:var(--blanco);
+  border:1px solid var(--g200);
+  border-radius:var(--radio);
+  box-shadow:var(--sombra);
+  margin-bottom:14px;
+}
+.card > h2{
+  margin:0; padding:13px 16px;
+  font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--g500); border-bottom:1px solid var(--g100);
+  display:flex; align-items:center; gap:8px;
+}
+.card > h2 .et{
+  margin-left:auto; text-transform:none; letter-spacing:0;
+  font-weight:500; font-size:11.5px; color:var(--g400);
+}
+.card-body{ padding:14px 16px; }
+.card-body + .card-body{ border-top:1px solid var(--g100); }
+
+.fila-btns{ display:flex; gap:9px; flex-wrap:wrap; }
+.fila-btns > *{ flex:1 1 auto; }
+
+/* ============================================================
+   Campos
+   ============================================================ */
+
+.campos{ display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.campos .ancho{ grid-column:1 / -1; }
+@media (max-width:560px){ .campos{ grid-template-columns:1fr; } }
+
+/* El hueco que hay que dejarle a la barra pegajosa cuando la app sube un
+   campo a la vista. Ver `subirALaVista` en app.js. */
+.campo{ scroll-margin-top:var(--top); }
+.campo label{
+  display:block; margin-bottom:5px;
+  font-size:13px; font-weight:550; color:var(--g700);
+}
+.ayuda{
+  display:block; font-weight:400; color:var(--g500);
+  font-size:11.5px; line-height:1.35; margin-top:3px;
+}
+
+input[type="text"], input[type="number"], input[type="date"],
+input[type="time"], textarea, select{
+  width:100%; padding:11px 12px;
+  font-variant-numeric:tabular-nums;
+  color:var(--g900); background:var(--blanco);
+  border:1px solid var(--g300); border-radius:9px;
+  outline:none; transition:border-color var(--trans), box-shadow var(--trans);
+}
+textarea{ resize:vertical; min-height:64px; font-variant-numeric:normal; }
+input:focus, textarea:focus, select:focus{
+  border-color:var(--verde);
+  box-shadow:0 0 0 3px rgba(173,208,16,.25);
+}
+input.malo{ border-color:var(--rojo); box-shadow:0 0 0 3px rgba(181,50,40,.12); }
+input:disabled, textarea:disabled{ background:var(--g50); color:var(--g500); }
+input[type="time"]{ min-height:46px; }
+
+.con-unidad{ position:relative; display:flex; align-items:center; }
+.con-unidad .u{
+  position:absolute; right:12px; font-size:12.5px; color:var(--g500);
+  pointer-events:none;
+}
+.con-unidad input{ padding-right:52px; }
+
+/* ============================================================
+   Combobox: escribir libre + lista de sugerencias
+
+   En el celular la lista se abre HACIA ARRIBA, porque abajo del campo está
+   el teclado y ahí no se ve nada. El alto lo ajusta app.js, que es el único
+   que sabe cuánto espacio quedó entre el campo y la barra de arriba.
+   ============================================================ */
+
+.combo{ position:relative; }
+.combo-input{ padding-right:64px !important; }
+
+.combo-flecha, .combo-clear{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:30px; height:30px; display:grid; place-items:center;
+  border:0; background:none; border-radius:50%;
+  color:var(--g500); cursor:pointer; transition:var(--trans);
+}
+.combo-flecha{ right:8px; font-size:11px; pointer-events:none; }
+.combo-clear{ right:34px; font-size:18px; line-height:1; display:none; }
+.combo.has-value .combo-clear{ display:grid; }
+.combo.is-ok .combo-input{ border-color:var(--verde-bd); }
+
+.combo-list{
+  position:absolute; z-index:40; bottom:calc(100% + 6px); left:0; right:0;
+  margin:0; padding:5px;
+  max-height:46vh; overflow-y:auto; overscroll-behavior:contain;
+  background:var(--blanco);
+  border:1px solid var(--g300); border-radius:11px;
+  box-shadow:var(--sombra-alta);
+}
+/* Rescate: el campo quedó tan arriba que no cabe nada. Esa vez va hacia abajo. */
+.combo.abre-abajo .combo-list{ top:calc(100% + 6px); bottom:auto; }
+
+.combo-list li{
+  min-height:46px; padding:12px 13px; border-radius:8px; cursor:pointer;
+  display:flex; align-items:center; gap:8px;
+  font-size:14.5px; color:var(--g900);
+}
+.combo-list li.is-active{ background:var(--verde-bg); }
+.combo-list li mark{ background:transparent; color:var(--verde-t); font-weight:700; }
+.combo-list li.vacio{ cursor:default; color:var(--g500); font-style:italic; }
+.combo-list li .marca-nuevo{
+  margin-left:auto; font-size:10.5px; font-weight:700; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--g400);
+}
+
+/* ============================================================
+   Botones
+   ============================================================ */
+
+.btn{
+  appearance:none; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:46px; padding:11px 16px;
+  font-size:14.5px; font-weight:600;
+  border:1px solid var(--g300); border-radius:10px;
+  background:var(--blanco); color:var(--g900);
+  transition:var(--trans);
+}
+.btn:disabled{ opacity:.42; cursor:not-allowed; }
+.btn-verde{ background:var(--verde); border-color:var(--verde); color:#1a2000; }
+.btn-verde:not(:disabled):active{ background:var(--verde-h); }
+.btn-rojo{ color:var(--rojo); border-color:var(--rojo-bd); background:var(--rojo-bg); }
+.btn-ambar{ color:var(--ambar); border-color:var(--ambar-bd); background:var(--ambar-bg); }
+.btn-plano{ border-color:transparent; background:transparent; color:var(--g500); }
+.btn-chico{ min-height:38px; padding:7px 12px; font-size:13px; border-radius:9px; }
+
+/* El botón de marcar la lectura: es el que se toca con guantes y sin mirar. */
+.btn-marcar{
+  width:100%; min-height:76px;
+  font-size:19px; font-weight:700; letter-spacing:-.01em;
+  border-radius:14px;
+  background:var(--verde); border:1px solid var(--verde); color:#1a2000;
+  box-shadow:0 2px 0 rgba(120,145,10,.55);
+}
+.btn-marcar:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(120,145,10,.55); }
+.btn-marcar small{ display:block; font-size:12px; font-weight:500; opacity:.72; margin-top:2px; }
+
+.icono-btn{
+  appearance:none; cursor:pointer;
+  width:38px; height:38px; flex:none;
+  display:grid; place-items:center;
+  border:1px solid var(--g200); border-radius:9px;
+  background:var(--blanco); color:var(--g500);
+  font-size:16px; line-height:1; transition:var(--trans);
+}
+.icono-btn.peligro{ color:var(--rojo); }
+
+@media (hover:hover){
+  .btn:not(:disabled):hover{ border-color:var(--verde); }
+  .btn-verde:not(:disabled):hover{ background:var(--verde-h); border-color:var(--verde-h); }
+  .btn-rojo:not(:disabled):hover{ background:#fbe6e4; border-color:var(--rojo); }
+  .btn-plano:hover{ background:var(--g100); color:var(--g900); }
+  .combo-list li:hover{ background:var(--verde-bg); }
+  .combo-list li.vacio:hover{ background:transparent; }
+  .combo-clear:hover{ background:var(--g100); color:var(--g900); }
+  .icono-btn:hover{ border-color:var(--verde); color:var(--g900); }
+  .icono-btn.peligro:hover{ border-color:var(--rojo); background:var(--rojo-bg); }
+}
+
+/* ============================================================
+   Notas y avisos
+   ============================================================ */
+
+.nota{
+  padding:10px 12px; border-radius:9px;
+  background:var(--g50); border:1px solid var(--g200);
+  font-size:13px; color:var(--g700);
+}
+.nota + .nota{ margin-top:9px; }
+.nota b{ color:var(--g900); font-variant-numeric:tabular-nums; }
+.nota.aviso{ background:var(--ambar-bg); border-color:var(--ambar-bd); color:var(--ambar); }
+.nota.aviso b{ color:var(--ambar); }
+.nota.error{ background:var(--rojo-bg); border-color:var(--rojo-bd); color:var(--rojo); }
+.nota.error b{ color:var(--rojo); }
+.nota.ok{ background:var(--verde-bg); border-color:var(--verde-bd); color:var(--verde-t); }
+.nota.ok b{ color:var(--verde-t); }
+
+.vacio-estado{ padding:34px 20px; text-align:center; color:var(--g500); }
+.vacio-estado .t{ font-weight:600; color:var(--g900); margin-bottom:4px; }
+.vacio-estado p{ font-size:13.5px; }
+
+/* ============================================================
+   Estudio en curso
+   ============================================================ */
+
+/* La tira de estudios abiertos, cuando hay más de uno. */
+.tira{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; scrollbar-width:none; }
+.tira::-webkit-scrollbar{ display:none; }
+.chip{
+  appearance:none; cursor:pointer; white-space:nowrap; flex:none;
+  padding:9px 13px; border-radius:999px;
+  border:1px solid var(--g300); background:var(--blanco);
+  font-size:13px; font-weight:600; color:var(--g700);
+}
+.chip[aria-pressed="true"]{ background:var(--verde-bg); border-color:var(--verde); color:var(--verde-t); }
+.chip .pt{
+  display:inline-block; width:7px; height:7px; border-radius:50%;
+  background:var(--verde); margin-right:6px; vertical-align:1px;
+  animation:latido 1.6s ease-in-out infinite;
+}
+
+/* Encabezado del estudio, ya arrancado: resumen de una línea. */
+.resumen-enc{ display:flex; align-items:flex-start; gap:10px; padding:13px 16px; }
+.resumen-enc .txt{ min-width:0; flex:1; }
+.resumen-enc .p1{ font-weight:650; font-size:15px; }
+.resumen-enc .p2{ font-size:12.5px; color:var(--g500); margin-top:1px; }
+.resumen-enc .p2 b{ color:var(--g700); font-weight:600; }
+
+/* El reloj grande */
+.reloj{
+  padding:20px 16px 18px; text-align:center;
+  background:linear-gradient(180deg, var(--verde-bg), var(--blanco));
+  border-bottom:1px solid var(--g100);
+}
+.reloj .total{
+  font-size:46px; font-weight:700; letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums; line-height:1.05; color:var(--g900);
+}
+.reloj .total small{ font-size:19px; font-weight:600; color:var(--g500); margin-left:3px; }
+.reloj .desde{ font-size:12.5px; color:var(--g500); margin-top:3px; }
+
+.actual{
+  margin:14px 16px 0; padding:12px 14px;
+  border:1px solid var(--verde-bd); border-radius:11px; background:var(--blanco);
+  display:flex; align-items:center; gap:12px; text-align:left;
+}
+.actual.externo{ border-color:var(--ambar-bd); background:var(--ambar-bg); }
+.actual.sin-describir{ border-color:var(--ambar-bd); background:var(--ambar-bg); }
+.actual .txt{ min-width:0; flex:1; }
+.actual .et{
+  font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--g500);
+}
+.actual .nom{
+  font-size:16px; font-weight:650; margin-top:1px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.actual .nom.pendiente{ color:var(--ambar); font-style:italic; font-weight:600; }
+.actual .cro{
+  font-size:22px; font-weight:700; font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em; flex:none;
+}
+
+/* Etiquetas de tipo */
+.tipo{
+  display:inline-block; padding:2px 8px; border-radius:999px;
+  font-size:11px; font-weight:700; letter-spacing:.02em;
+  border:1px solid transparent; white-space:nowrap;
+}
+.tipo-Fijo{ background:var(--verde-bg); color:var(--verde-t); border-color:var(--verde-bd); }
+.tipo-Variable{ background:var(--azul-bg); color:var(--azul); border-color:#cfe4ef; }
+.tipo-Externo{ background:var(--ambar-bg); color:var(--ambar); border-color:var(--ambar-bd); }
+.tipo-NA{ background:var(--g100); color:var(--g500); border-color:var(--g200); }
+
+/* Lista de tramos */
+.tramos li{
+  display:flex; align-items:center; gap:11px;
+  padding:11px 16px; border-top:1px solid var(--g100);
+  cursor:pointer; transition:background var(--trans);
+}
+.tramos li:first-child{ border-top:0; }
+.tramos li.corriendo{ background:var(--verde-bg); cursor:default; }
+.tramos li.pendiente{ background:var(--ambar-bg); }
+@media (hover:hover){ .tramos li:not(.corriendo):hover{ background:var(--g50); } }
+
+.tramos .hora{
+  flex:none; width:52px; text-align:right;
+  font-size:14px; font-weight:650; font-variant-numeric:tabular-nums; color:var(--g700);
+}
+.tramos .med{ min-width:0; flex:1; }
+.tramos .d1{
+  font-size:14.5px; font-weight:550;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tramos .d1.sin{ color:var(--ambar); font-style:italic; }
+.tramos .d2{ display:flex; align-items:center; gap:7px; margin-top:3px; flex-wrap:wrap; }
+.tramos .obs{
+  font-size:12px; color:var(--ambar); margin-top:3px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tramos .gente{ font-size:11.5px; color:var(--g500); }
+.tramos .dur{
+  flex:none; text-align:right;
+  font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+.tramos .dur small{ display:block; font-size:10.5px; font-weight:500; color:var(--g400); }
+
+/* ============================================================
+   Resultados del estudio
+   ============================================================ */
+
+.tabla-res{ width:100%; border-collapse:collapse; }
+.tabla-res th, .tabla-res td{
+  padding:9px 16px; text-align:left; font-size:13.5px;
+  border-top:1px solid var(--g100);
+}
+.tabla-res tr:first-child th, .tabla-res tr:first-child td{ border-top:0; }
+.tabla-res th{ font-weight:550; color:var(--g700); }
+.tabla-res td{
+  text-align:right; font-weight:650; font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.tabla-res td .u{ font-weight:500; color:var(--g500); font-size:12px; margin-left:3px; }
+.tabla-res tr.seccion th{
+  background:var(--g50); color:var(--g500);
+  font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+}
+.tabla-res tr.fuerte td{ color:var(--verde-t); font-size:16px; }
+
+.rend-grande{
+  padding:16px; text-align:center;
+  background:var(--verde-bg); border-top:1px solid var(--verde-bd);
+}
+.rend-grande .v{
+  font-size:34px; font-weight:700; letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums; color:var(--verde-t); line-height:1.1;
+}
+.rend-grande .u{ font-size:13px; color:var(--verde-t); opacity:.85; }
+.rend-grande .sub{ font-size:12.5px; color:var(--g700); margin-top:6px; }
+
+/* ============================================================
+   Tablas anchas (historial, rendimientos)
+   ============================================================ */
+
+.tabla-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table.datos{ width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap; }
+table.datos th, table.datos td{
+  padding:9px 12px; text-align:left; border-bottom:1px solid var(--g100);
+}
+table.datos thead th{
+  position:sticky; top:0; z-index:1;
+  background:var(--g50); color:var(--g500);
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+}
+table.datos td.n{ text-align:right; font-variant-numeric:tabular-nums; }
+table.datos tbody tr{ cursor:pointer; }
+@media (hover:hover){ table.datos tbody tr:hover{ background:var(--g50); } }
+table.datos td.acc{ text-align:right; white-space:nowrap; }
+
+/* Historial en celular: tarjetas en vez de tabla. */
+.lista-est li{
+  display:flex; align-items:center; gap:11px;
+  padding:12px 16px; border-top:1px solid var(--g100); cursor:pointer;
+}
+.lista-est li:first-child{ border-top:0; }
+.lista-est .txt{ min-width:0; flex:1; }
+.lista-est .l1{ font-weight:650; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lista-est .l2{ font-size:12.5px; color:var(--g500); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lista-est .der{ flex:none; text-align:right; }
+.lista-est .rend{ font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--verde-t); }
+.lista-est .rend.sin{ color:var(--g400); font-size:13px; font-weight:600; }
+.lista-est .rend small{ display:block; font-size:10px; font-weight:500; color:var(--g400); }
+.lista-est li.abierto{ background:var(--verde-bg); }
+
+/* ============================================================
+   Rendimientos (el análisis)
+   ============================================================ */
+
+.grupo{ border-top:1px solid var(--g100); }
+.grupo:first-child{ border-top:0; }
+.grupo > summary{
+  padding:13px 16px; cursor:pointer; list-style:none;
+  display:flex; align-items:center; gap:11px;
+}
+.grupo > summary::-webkit-details-marker{ display:none; }
+.grupo .txt{ min-width:0; flex:1; }
+.grupo .g1{ font-weight:650; font-size:14.5px; }
+.grupo .g2{ font-size:12px; color:var(--g500); margin-top:2px; }
+.grupo .val{ flex:none; text-align:right; }
+.grupo .val .v{ font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--verde-t); }
+.grupo .val .u{ font-size:10.5px; color:var(--g400); }
+.grupo-cuerpo{ padding:0 16px 14px; }
+
+.modelo{
+  margin:0 0 12px; padding:11px 13px;
+  background:var(--verde-bg); border:1px solid var(--verde-bd); border-radius:9px;
+  font-size:13px; color:var(--verde-t);
+}
+.modelo b{ font-variant-numeric:tabular-nums; }
+.modelo .exp{ display:block; margin-top:5px; color:var(--g700); font-size:12px; }
+
+.barra-disp{ display:flex; align-items:center; gap:8px; margin-top:8px; }
+.barra-disp .bar{ flex:1; height:6px; border-radius:3px; background:var(--g200); position:relative; overflow:hidden; }
+.barra-disp .bar i{ position:absolute; top:0; bottom:0; background:var(--verde); border-radius:3px; }
+.barra-disp span{ font-size:11.5px; color:var(--g500); font-variant-numeric:tabular-nums; }
+
+/* ============================================================
+   Ajustes: listas editables
+   ============================================================ */
+
+.etiquetas{ display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.etiqueta{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 8px 6px 12px; border-radius:999px;
+  background:var(--g100); border:1px solid var(--g200);
+  font-size:13px;
+}
+.etiqueta button{
+  appearance:none; border:0; background:none; cursor:pointer;
+  width:20px; height:20px; border-radius:50%;
+  display:grid; place-items:center; color:var(--g500); font-size:15px; line-height:1;
+}
+@media (hover:hover){ .etiqueta button:hover{ background:var(--rojo-bg); color:var(--rojo); } }
+.agregar{ display:flex; gap:8px; margin-top:11px; }
+.agregar input{ flex:1; }
+
+/* ============================================================
+   Hoja modal (se sube desde abajo en celular)
+   ============================================================ */
+
+.velo{
+  position:fixed; inset:0; z-index:50;
+  background:rgba(27,29,25,.42);
+  display:flex; align-items:flex-end; justify-content:center;
+  padding:0;
+}
+.velo[hidden]{ display:none; }
+.hoja{
+  width:100%; max-width:520px; max-height:92vh;
+  display:flex; flex-direction:column;
+  background:var(--blanco);
+  border-radius:16px 16px 0 0;
+  box-shadow:var(--sombra-alta);
+  animation:subir .18s ease-out;
+}
+@keyframes subir{ from{ transform:translateY(14px); opacity:.6; } }
+.hoja-top{
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px; border-bottom:1px solid var(--g100);
+}
+.hoja-top h3{ font-size:15.5px; font-weight:650; flex:1; min-width:0; }
+.hoja-cuerpo{ padding:15px 16px; overflow-y:auto; flex:1; }
+.hoja-pie{
+  display:flex; gap:9px; padding:13px 16px;
+  border-top:1px solid var(--g100);
+  padding-bottom:calc(13px + env(safe-area-inset-bottom));
+}
+.hoja-pie .btn{ flex:1; }
+
+@media (min-width:640px){
+  .velo{ align-items:center; padding:20px; }
+  .hoja{ border-radius:16px; }
+}
+
+/* ============================================================
+   Toast
+   ============================================================ */
+
+#toast{
+  position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom));
+  transform:translate(-50%, 14px); z-index:70;
+  max-width:min(92vw,460px);
+  padding:11px 17px; border-radius:11px;
+  background:var(--g900); color:var(--blanco);
+  font-size:13.5px; text-align:center;
+  box-shadow:var(--sombra-alta);
+  opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+}
+#toast.ver{ opacity:1; transform:translate(-50%,0); }
+
+#sin-storage{ margin:0 0 14px; }
+
+/* ============================================================
+   Escritorio
+   ============================================================ */
+
+@media (min-width:700px){
+  :root{ --top:112px; }
+  main{ padding:22px 20px 80px; }
+  .topbar-in{ padding:12px 20px 0; }
+  .marca h1{ font-size:16px; }
+
+  /* Con mouse no hay teclado que tape: el desplegable vuelve a abrir hacia abajo. */
+  .combo-list{ top:calc(100% + 6px); bottom:auto; max-height:320px; }
+
+  .reloj .total{ font-size:54px; }
+  .dos-col{ display:grid; grid-template-columns:1fr 380px; gap:18px; align-items:start; }
+  .dos-col > *{ min-width:0; }
+}
+
+@media print{
+  .topbar, .btn, .icono-btn, #toast{ display:none !important; }
+  .card{ break-inside:avoid; box-shadow:none; }
+}
