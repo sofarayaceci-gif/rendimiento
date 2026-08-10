@@ -203,10 +203,22 @@ function escribir(llave, valor){
 let estudios = leer(CLAVE_ESTUDIOS, []);
 if(!Array.isArray(estudios)) estudios = [];
 
+/* Los ajustes guardados pisan a los de fábrica lista por lista, no valor por
+   valor: quien ya tenía `unidades` guardadas se queda con las suyas, y está
+   bien —son de ella—. Lo único que se le devuelve a la fuerza es `ciclo`,
+   porque esa palabra no la escribe una persona: la escribe la app cuando se
+   toca «fue un ciclo completo», y una unidad que la app usa pero que no está
+   en la lista no se podría volver a escoger a mano. */
+function normalizarAjustes(datos){
+  const a = Object.assign({}, AJUSTES_INICIALES, datos || {});
+  if(!a.elementos || typeof a.elementos !== 'object') a.elementos = {};
+  if(!Array.isArray(a.unidades)) a.unidades = AJUSTES_INICIALES.unidades.slice();
+  if(a.unidades.indexOf('ciclo') === -1) a.unidades.push('ciclo');
+  return a;
+}
+
 let guardadoAjustes = leer(CLAVE_AJUSTES, null);
-let ajustes = Object.assign({}, AJUSTES_INICIALES,
-  (guardadoAjustes && guardadoAjustes.datos) || {});
-if(!ajustes.elementos || typeof ajustes.elementos !== 'object') ajustes.elementos = {};
+let ajustes = normalizarAjustes(guardadoAjustes && guardadoAjustes.datos);
 let ajustesTocado = (guardadoAjustes && guardadoAjustes.tocado) || '';
 
 let activoId = leer(CLAVE_ACTIVO, '');
@@ -1985,8 +1997,7 @@ function arrancar(){
     escribirEstudios: lista => { estudios = lista; guardarEstudios(); },
     leerAjustes: () => ({ datos:ajustes, tocado:ajustesTocado }),
     escribirAjustes: (datos, tocado) => {
-      ajustes = Object.assign({}, AJUSTES_INICIALES, datos || {});
-      if(!ajustes.elementos || typeof ajustes.elementos !== 'object') ajustes.elementos = {};
+      ajustes = normalizarAjustes(datos);
       ajustesTocado = tocado;
       escribir(CLAVE_AJUSTES, { datos:ajustes, tocado:ajustesTocado });
     },
