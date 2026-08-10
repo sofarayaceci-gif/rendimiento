@@ -13,24 +13,62 @@ Adelante Desarrollos.
 
 Se abre un estudio con el encabezado —proyecto, características, actividad,
 sub-actividad, cuadrilla y cuánta gente hay— y a partir de ahí **el estudio
-queda abierto, como un turno**. Cada vez que la cuadrilla cambia de tarea se
-toca **Nueva lectura**: la app anota la hora, cierra el tramo anterior con su
-duración y arranca el siguiente.
+queda corriendo**. Arriba del reloj siempre dice en cuál de los dos estados
+está: **En curso** o **Terminado**.
 
-Los tres botones de la pantalla:
+Cada vez que la cuadrilla cambia de tarea se toca el botón grande: la app anota
+la hora, cierra el tramo anterior con su duración y arranca el siguiente.
 
 | Botón | Para qué |
 |---|---|
-| **Nueva lectura** | Cambiaron de tarea. Es el botón grande, el que se toca sin mirar. |
-| **Interrupción** | Lo mismo, pero el tramo nace ya marcado como **Externo**. Es el caso más frecuente —llegó tarde el material, empezó a llover— y así es un toque en vez de tres. |
+| **Cambiaron de tarea** | El botón grande, el que se toca sin mirar. Cierra el tramo que venía y empieza otro. |
+| **Se pararon** | Lo mismo, pero el tramo nace ya marcado como **Externo**. Es el caso más frecuente —llegó tarde el material, empezó a llover, esperando la grúa— y así es un toque en vez de tres. |
 | **Terminar estudio** | Pide la hora en que terminaron —ya puesta con la de ahora, corregible—, cierra el tramo que va corriendo y pasa a la producción medida. |
 
 Lo de pedir la hora al terminar no es un trámite: es el único momento del
 estudio donde uno casi nunca toca el botón justo cuando pasa la cosa. La
 cuadrilla termina, uno mide, conversa, y se acuerda diez minutos después.
 
+### Seguir con un estudio ya terminado
+
+Con el estudio terminado, el botón grande pasa a ser **Seguir con el estudio**,
+y pregunta desde qué hora sigue. La hora viene puesta con la del cierre, y de
+ahí salen los dos casos reales:
+
+- **Se cerró por error** y no habían terminado: se deja la hora como está y el
+  cronómetro sigue de ahí, como si nada. El tramo que se había cerrado
+  simplemente vuelve a correr.
+- **Volvieron a trabajar más tarde**: se pone la hora en que volvieron, y el
+  rato de por medio entra como una **parada** —un tramo `Externo` llamado
+  «Parados», que después se puede describir mejor tocándolo—.
+
+Ese segundo caso es la razón de que la pantalla pregunte en vez de dar por
+hecho que es «ahora». Antes reabrir arrancaba un tramo nuevo con la hora del
+momento y dejaba un hueco: estudio cerrado a las 11:00, reabierto a las 14:00,
+y esas tres horas no quedaban dentro de ningún tramo. El reloj decía 6:00 y la
+tabla sumaba 3:00. Ahora los tramos nunca dejan de estar pegados uno con otro,
+que es de lo que dependen todas las cuentas.
+
 Al final se anota **cuánto se produjo** y en qué unidad, y ahí sale el
 rendimiento.
+
+### Cuando no se midió nada
+
+Rendimiento es tiempo dividido entre producción, así que sin producción no hay
+división que hacer. Pero hay un caso donde no hace falta medir: cuando el
+estudio cubrió **un elemento completo, de principio a fin** —un muro, una
+columna, un tramo de losa—. Ahí la producción es ese elemento, y el botón
+**«No la medí · fue un ciclo completo»** lo deja anotado como `1 ciclo` de un
+toque.
+
+El rendimiento sale entonces en **horas por ciclo** en vez de horas por m², que
+es exactamente lo que su Excel llamaba *tiempo del ciclo neto*. No es un número
+inventado: es lo que se observó. Y esos estudios se promedian entre ellos como
+cualquier otro, en su propio grupo — la unidad forma parte del grupo, así que
+los ciclos nunca se mezclan con los m².
+
+Si midió pero no en metros, tampoco hace falta el botón: cuente elementos y
+póngalo a mano —`3` `muros`, `12` `paneles`—. Es igual de válido.
 
 ### La hora se guarda antes de preguntar nada
 
@@ -144,16 +182,19 @@ esto?»*, que es la pregunta para cotizar.
 
 Abriendo un grupo está el detalle: **una fila por estudio, con su fecha**,
 proyecto, producción, tiempo neto, personas y rendimiento. Tocando una fila se
-abre ese estudio completo, con todas sus lecturas, para revisarlo o corregirlo.
+abre ese estudio completo, con todas sus lecturas, para revisarlo o corregirlo;
+y la **✕** del final de la fila lo borra, para cuando uno quedó mal tomado y no
+vale la pena arreglarlo. Pregunta antes, y borra en todos los aparatos.
 
 El promedio va **ponderado por producción**, no promedio de promedios: un
 estudio de 80 m² dice más que uno de 5.
 
 **Todavía sin rendimiento.** Los que no se pueden promediar: los que están
 abiertos y los que cerraron sin anotar la producción. Aparecen solo cuando hay
-alguno, con su fecha y el motivo al lado, y también se abren tocándolos. Están
-ahí a propósito: sin esa lista un estudio que cerró sin medir la producción no
-saldría en ningún grupo y no habría manera de volver a abrirlo para terminarlo.
+alguno, con su fecha y el motivo al lado, y también se abren tocándolos o se
+borran con la **✕**. Están ahí a propósito: sin esa lista un estudio que cerró
+sin medir la producción no saldría en ningún grupo y no habría manera de volver
+a abrirlo para terminarlo.
 
 ## Ajustes, en la tuerca de arriba
 
@@ -292,11 +333,17 @@ archivo de la app.
   para tabla dinámica. Va **al final**, y solo aparece cuando se exporta más de
   un estudio: con uno solo sería una tabla de una fila.
 
-Los colores son **blanco** en los datos, **gris `#D9D9D9`** en los rótulos de la
-izquierda —el mismo del Excel original— y **verde `#ADD010`**, el institucional,
-en el encabezado de la tabla y en las barras de sección. El verde que se veía en
-la captura del Excel original no era un relleno: era el resaltado que Excel le
-pone al rango que tiene seleccionado.
+Los colores son los del Excel original, calcados: **gris `#D9D9D9`** en los
+rótulos de la izquierda, en la fila de títulos y en las barras de sección, y
+**blanco** en todo lo demás. El verde institucional se quedó en la app y no
+entra en el archivo; en el Excel de referencia no existía —lo que se veía verde
+en la captura era el resaltado que Excel le pone al rango que tiene
+seleccionado, no un relleno—.
+
+La única celda con color propio es la del **rendimiento**, en verde muy suave.
+Esa celda en el original estaba vacía —el rótulo estaba puesto pero nunca se
+escribió la fórmula—, así que no hay nada que calcar, y conviene que el número
+por el que se hace todo el estudio se distinga de un vistazo.
 
 La hoja de cada estudio agrega tres filas que el original no tenía, debajo de la
 barra **Rendimiento**: el rendimiento por persona, la producción por hora y —en

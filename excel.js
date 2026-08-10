@@ -128,13 +128,20 @@ const Excel = (() => {
   }
 
   /* ── Estilos ──────────────────────────────────────────────────────────
-     El gris D9D9D9 es el mismo del Excel original (allá venía por tema, acá va
-     resuelto). El verde ADD010 es el institucional, y es lo único que se
-     agrega: en el original ese verde no existía —lo que se veía verde en la
-     captura era el resaltado que Excel le pone al rango seleccionado—.        */
+     Calcado del Excel original: gris D9D9D9 en los rótulos, en la fila de
+     títulos y en las barras de sección —allá el gris venía por tema, acá va
+     resuelto—, y blanco en todo lo demás.
+
+     El verde institucional se quedó en la app y no entra en el archivo: en el
+     Excel de referencia no existía. Lo que se veía verde en la captura era el
+     resaltado que Excel le pone al rango que tiene seleccionado, no un relleno.
+
+     La única excepción es la celda del rendimiento, en verde muy suave. Esa
+     celda en el original estaba vacía —el rótulo estaba puesto pero nunca se
+     escribió la fórmula—, así que no hay nada que calcar y sí conviene que el
+     número por el que se hace todo el estudio se distinga de un vistazo.      */
 
   const GRIS  = 'FFD9D9D9';
-  const VERDE = 'FFADD010';
   const SUAVE = 'FFF4F9E0';
 
   const ESTILOS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -151,11 +158,10 @@ const Excel = (() => {
 <font><b/><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>
 <font><i/><sz val="10"/><color rgb="FF7B8078"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font>
 </fonts>
-<fills count="5">
+<fills count="4">
 <fill><patternFill patternType="none"/></fill>
 <fill><patternFill patternType="gray125"/></fill>
 <fill><patternFill patternType="solid"><fgColor rgb="${GRIS}"/><bgColor indexed="64"/></patternFill></fill>
-<fill><patternFill patternType="solid"><fgColor rgb="${VERDE}"/><bgColor indexed="64"/></patternFill></fill>
 <fill><patternFill patternType="solid"><fgColor rgb="${SUAVE}"/><bgColor indexed="64"/></patternFill></fill>
 </fills>
 <borders count="2">
@@ -167,15 +173,15 @@ const Excel = (() => {
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
 <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
-<xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
-<xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
 <xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
 <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
-<xf numFmtId="166" fontId="1" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
+<xf numFmtId="166" fontId="1" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="168" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
 <xf numFmtId="1" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>
@@ -189,15 +195,15 @@ const Excel = (() => {
     NORMAL:0,
     ROTULO:1,        // gris, negrita, borde   → los rótulos de la izquierda
     DATO_C:2,        // borde, centro          → los datos del encabezado
-    CAB:3,           // verde, negrita, wrap   → la fila de títulos de la tabla
-    BARRA:4,         // verde, negrita         → las barras de sección
+    CAB:3,           // gris, negrita, wrap    → la fila de títulos de la tabla
+    BARRA:4,         // gris, negrita          → las barras de sección
     HORA:5,          // hh:mm
     DUR:6,           // [h]:mm
     TEXTO:7,         // borde, izquierda
     TEXTO_B:8,       // borde, izquierda, negrita
     TEXTO_C:9,       // borde, centro
     NUM4:10,         // 0.0000
-    REND:11,         // verde suave, negrita, 0.0000
+    REND:11,         // verde muy suave, negrita, 0.0000 → el número del estudio
     FECHA:12,
     NUM2:13,         // 0.00
     ENTERO:14,

@@ -291,6 +291,7 @@ input[type="time"]{ min-height:46px; }
   font-size:16px; line-height:1; transition:var(--trans);
 }
 .icono-btn.peligro{ color:var(--rojo); }
+.icono-btn.chico{ width:30px; height:30px; font-size:15px; border-radius:8px; }
 
 @media (hover:hover){
   .btn:not(:disabled):hover{ border-color:var(--verde); }
@@ -358,6 +359,21 @@ input[type="time"]{ min-height:46px; }
   background:linear-gradient(180deg, var(--verde-bg), var(--blanco));
   border-bottom:1px solid var(--g100);
 }
+/* En qué estado está el estudio, dicho con palabras. Antes había que
+   deducirlo de cuáles botones estaban a la vista. */
+.reloj .estado{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 11px; margin-bottom:8px; border-radius:999px;
+  font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  background:var(--verde-bg); color:var(--verde-t); border:1px solid var(--verde-bd);
+}
+.reloj .estado .pt{
+  width:7px; height:7px; border-radius:50%; background:var(--verde);
+  animation:latido 1.6s ease-in-out infinite;
+}
+.reloj .estado.terminado{ background:var(--g100); color:var(--g500); border-color:var(--g200); }
+.reloj .estado.terminado .pt{ background:var(--g400); animation:none; }
+
 .reloj .total{
   font-size:46px; font-weight:700; letter-spacing:-.03em;
   font-variant-numeric:tabular-nums; line-height:1.05; color:var(--g900);

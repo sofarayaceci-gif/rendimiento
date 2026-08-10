@@ -177,6 +177,7 @@
 
         <div class="card">
           <div class="reloj">
+            <div class="estado" id="reloj-estado"></div>
             <div class="total" id="reloj-total">0:00<small>h</small></div>
             <div class="desde" id="reloj-desde"></div>
           </div>
@@ -191,11 +192,11 @@
 
           <div class="card-body" style="border-top:0">
             <button type="button" class="btn-marcar" id="b-lectura">
-              Nueva lectura
-              <small>Cambiaron de tarea</small>
+              Cambiaron de tarea
+              <small>Anota la hora y empieza otro tramo</small>
             </button>
             <div class="fila-btns" style="margin-top:9px">
-              <button type="button" class="btn btn-ambar" id="b-interrupcion">Interrupción</button>
+              <button type="button" class="btn btn-ambar" id="b-interrupcion">Se pararon</button>
               <button type="button" class="btn" id="b-terminar">Terminar estudio</button>
             </div>
           </div>
@@ -222,6 +223,8 @@
               <div class="campo">
                 <label for="i-produccion">Producción medida</label>
                 <input type="number" id="i-produccion" min="0" step="any" inputmode="decimal" placeholder="40">
+                <span class="ayuda">Lo que hizo esa cuadrilla en esas horas. Si no
+                  midió metros, cuente elementos: 3 muros, 12 paneles.</span>
               </div>
               <div class="campo">
                 <label for="i-unidad">Unidad</label>
@@ -234,6 +237,17 @@
                   <ul class="combo-list" id="lista-unidad" role="listbox" hidden></ul>
                 </div>
               </div>
+              <!-- Para el estudio que cubre un elemento de principio a fin. Ahí
+                   no hay nada que medir: la producción es ese elemento, y el
+                   rendimiento son las horas que tomó. -->
+              <div class="campo ancho">
+                <button type="button" class="btn btn-chico" id="b-un-ciclo" style="width:100%">
+                  No la medí · fue un ciclo completo
+                </button>
+                <span class="ayuda">Un muro, una columna, un tramo de losa: de
+                  principio a fin. El rendimiento queda en horas por ciclo.</span>
+              </div>
+
               <div class="campo ancho">
                 <label for="i-nota">Nota del estudio</label>
                 <textarea id="i-nota" rows="2" placeholder="Lo que haya que aclarar"></textarea>

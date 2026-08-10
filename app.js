@@ -21,10 +21,10 @@
 const TIPOS = ['Fijo', 'Variable', 'Externo', 'N/A'];
 
 const AYUDA_TIPO = {
-  'Fijo':     'No depende de cuánto se produzca: montaje, aplome, acomodo.',
-  'Variable': 'Crece con la cantidad producida: colar, pegar, repellar.',
-  'Externo':  'Interrupción ajena a la cuadrilla: falta material, lluvia.',
-  'N/A':      'No entra en la composición del ciclo.'
+  'Fijo':     'Preparar. No depende de cuánto se produzca: montar, acomodar, aplomar.',
+  'Variable': 'Producir. Crece con la cantidad: colar, pegar, repellar.',
+  'Externo':  'Parados por algo ajeno a la cuadrilla: falta material, lluvia, esperando.',
+  'N/A':      'Ninguno de los anteriores. No entra en la composición del ciclo.'
 };
 
 const CLAVE_ESTUDIOS = 'rend.estudios.v1';
@@ -40,7 +40,9 @@ const AJUSTES_INICIALES = {
                'Repellos', 'Gypsum', 'Pintura', 'Enchapes', 'Fontanería', 'Eléctrico'],
   actividades: [],
   subactividades: [],
-  unidades: ['m²', 'ml', 'm³', 'unidades', 'sacos', 'kg'],
+  /* `ciclo` es la unidad del estudio que cubre un elemento completo y no midió
+     nada: ahí la producción es 1 y el rendimiento son las horas que tomó. */
+  unidades: ['m²', 'ml', 'm³', 'unidades', 'ciclo', 'sacos', 'kg'],
   /* Elementos por cuadrilla: { 'Formaleta': ['Acomodo telescópica', …] } */
   elementos: {}
 };
@@ -328,7 +330,8 @@ function avisosDe(e, c){
 
   if(e.cerrado && !c.produccion){
     av.push(['aviso', 'Falta la <b>producción medida</b>: sin ella no hay rendimiento ' +
-      'y el estudio no entra en los promedios.']);
+      'y el estudio no entra en los promedios. Si el estudio cubrió un elemento ' +
+      'completo, toque <b>«No la medí · fue un ciclo completo»</b>.']);
   }
 
   if(c.produccion && !e.unidad){
@@ -729,8 +732,10 @@ function pintarEstudio(){
       '<span class="pt"></span>' + escapar(x.proyecto || 'Sin proyecto') +
       ' · ' + escapar(x.cuadrilla || '—') + '</button>'
     ).join('') +
+    /* El que está a la vista, si ya terminó, no sale en `abiertos`: se le pone
+       su propio chip para que se vea dónde está uno parado. */
     (e.cerrado
-      ? '<button type="button" class="chip" aria-pressed="true">' +
+      ? '<button type="button" class="chip" data-ir="' + escapar(e.id) + '" aria-pressed="true">' +
         escapar(e.proyecto || 'Sin proyecto') + ' · terminado</button>'
       : '') +
     '<button type="button" class="chip" data-ir="nuevo">+ Estudio nuevo</button>';
@@ -768,11 +773,18 @@ function pintarEstudio(){
    `setInterval` de abajo, así que acá no se pinta nada que sea caro. */
 function pintarReloj(e, c){
   const corriendo = c.corriendo;
-  const fin = corriendo ? Date.now() : (c.fin ? new Date(c.fin).getTime() : Date.now());
-  const totalSeg = c.inicio ? (fin - new Date(c.inicio).getTime()) / 1000 : 0;
 
-  id('reloj-total').innerHTML = hms(totalSeg) +
-    '<small>' + (e.cerrado ? ' h · terminado' : ' h') + '</small>';
+  /* El total se suma tramo por tramo, no se saca restando la última hora menos
+     la primera. Da lo mismo mientras los tramos estén pegados —que es siempre—,
+     pero así el reloj grande no puede contradecir a la tabla de abajo. */
+  const totalSeg = c.total * 3600 +
+    (corriendo ? (Date.now() - new Date(corriendo.desde).getTime()) / 1000 : 0);
+
+  id('reloj-estado').className = 'estado' + (e.cerrado ? ' terminado' : '');
+  id('reloj-estado').innerHTML = '<span class="pt"></span>' +
+    (e.cerrado ? 'Terminado' : 'En curso');
+
+  id('reloj-total').innerHTML = hms(totalSeg) + '<small> h</small>';
   id('reloj-desde').textContent = c.inicio
     ? 'Desde las ' + horaDe(c.inicio) + (c.fin && e.cerrado ? ' hasta las ' + horaDe(c.fin) : '')
     : '';
@@ -797,12 +809,12 @@ function pintarReloj(e, c){
     $('.et', caja).textContent = e.cerrado ? 'Total' : '—';
   }
 
-  /* Con el estudio cerrado no hay nada que marcar: el botón grande pasa a
-     ser el de reabrir, para no dejar sin salida a quien lo cerró de más. */
+  /* Con el estudio terminado no hay nada que marcar: el botón grande pasa a
+     ser el de seguir, para no dejar sin salida a quien lo cerró de más. */
   const marcar = id('b-lectura');
   marcar.innerHTML = e.cerrado
-    ? 'Reabrir estudio<small>Sigue corriendo desde ahora</small>'
-    : 'Nueva lectura<small>Cambiaron de tarea</small>';
+    ? 'Seguir con el estudio<small>Si lo terminó por error o volvieron a trabajar</small>'
+    : 'Cambiaron de tarea<small>Anota la hora y empieza otro tramo</small>';
   id('b-interrupcion').hidden = e.cerrado;
   id('b-terminar').hidden = e.cerrado;
   id('b-agregar-lectura').hidden = false;
@@ -1011,7 +1023,7 @@ function marcarLectura(e, tipoInicial){
 
   tocar(e);
   editarTramo(e, tramos.length - 1, {
-    titulo: tipoInicial === 'Externo' ? 'Interrupción' : '¿Qué empiezan ahora?'
+    titulo: tipoInicial === 'Externo' ? '¿Por qué se pararon?' : '¿Qué empiezan ahora?'
   });
 }
 
@@ -1063,19 +1075,74 @@ function terminarEstudio(e){
   });
 }
 
-function reabrirEstudio(e){
-  e.cerrado = false;
-  e.tramos.push({
-    id: nuevoId(),
-    desde: ahora(),
-    hasta: null,
-    descripcion: '',
-    tipo: 'Variable',
-    personas: null,
-    obs: ''
+/* Seguir con un estudio que ya se había terminado.
+
+   Antes esto arrancaba un tramo nuevo con la hora de ahora y dejaba un hueco:
+   estudio cerrado a las 11:00, reabierto a las 14:00, y esas tres horas no
+   quedaban dentro de ningún tramo. El reloj grande decía 6:00 y la tabla
+   sumaba 3:00, y en el Excel la columna de duración no calzaba con la de
+   horas.
+
+   Ahora se pregunta desde cuándo sigue, y los tramos nunca dejan de estar
+   pegados uno con otro: si hay un rato de por medio, ese rato entra como una
+   parada, que es lo que de verdad fue. */
+function seguirEstudio(e){
+  const fin = calcular(e).fin;
+  if(!fin){ e.cerrado = false; tocar(e); return; }
+
+  Hoja.abrir({
+    titulo: 'Seguir con el estudio',
+    cuerpo:
+      '<p class="nota" style="margin-bottom:13px">El estudio se terminó a las ' +
+      '<b>' + horaDe(fin) + '</b>.</p>' +
+      '<p class="nota" style="margin-bottom:13px">' +
+      '<b>Si lo cerró por error</b> y no habían terminado, deje la hora como está: ' +
+      'el cronómetro sigue de ahí, como si nada.<br><br>' +
+      '<b>Si volvieron a trabajar más tarde</b>, ponga la hora en que volvieron. ' +
+      'El rato de por medio queda anotado como una parada, para que no se pierda ' +
+      'tiempo sin explicar.</p>' +
+      campoHora('h-sigue', 'Siguen desde las', horaDe(fin)),
+    textoGuardar: 'Seguir',
+    guardar(){
+      const desde = conHora(fin, id('h-sigue').value);
+      if(!desde) return 'La hora no es válida.';
+      if(new Date(desde) < new Date(fin)){
+        return 'No puede ser antes de las <b>' + horaDe(fin) +
+               '</b>, que fue cuando terminó.';
+      }
+      if(new Date(desde) > new Date()){
+        return 'Las <b>' + horaDe(desde) + '</b> todavía no han llegado: son las <b>' +
+               horaDe(ahora()) + '</b>.';
+      }
+
+      const ultimo = e.tramos[e.tramos.length - 1];
+      const hueco = horasEntre(fin, desde);
+      e.cerrado = false;
+
+      /* Menos de un minuto: fue un dedazo, el último tramo nunca terminó. */
+      if(hueco < 1 / 60){
+        ultimo.hasta = null;
+        tocar(e);
+        toast('El estudio sigue corriendo');
+        return null;
+      }
+
+      e.tramos.push({
+        id: nuevoId(), desde: fin, hasta: desde,
+        descripcion: 'Parados', tipo: 'Externo', personas: null, obs: ''
+      });
+      e.tramos.push({
+        id: nuevoId(), desde, hasta: null,
+        descripcion: '', tipo: 'Variable', personas: ultimo.personas || null, obs: ''
+      });
+      tocar(e);
+
+      setTimeout(() => editarTramo(e, e.tramos.length - 1, {
+        titulo: '¿Qué empiezan ahora?'
+      }), 0);
+      return null;
+    }
   });
-  tocar(e);
-  editarTramo(e, e.tramos.length - 1, { titulo:'¿Qué empiezan ahora?' });
 }
 
 /* ---------- Editar un tramo ---------- */
@@ -1196,6 +1263,38 @@ function editarTramo(e, i, opciones){
     });
   }
 }
+
+/* Borrar un estudio entero. Se llega acá desde tres lados —el detalle del
+   estudio, la tabla de un grupo y la lista de los que no tienen rendimiento—,
+   así que la cuenta vive en un solo lugar.
+
+   El estudio NO se saca del arreglo: se marca borrado y se le pone fecha
+   nueva. Es la única forma de que el borrado se propague; si se sacara, el
+   otro aparato lo volvería a subir al sincronizar y reaparecería en todos
+   lados. */
+function borrarEstudio(idEst){
+  const e = buscarEstudio(idEst);
+  if(!e || e.borrado) return;
+
+  const cual = (e.proyecto || 'Sin proyecto') + ' del ' + fechaCorta(e.fecha) +
+               (e.cuadrilla ? ' · ' + e.cuadrilla : '');
+  if(!confirm('¿Borrar el estudio ' + cual + '?\n\nSe borra también en los demás aparatos.')) return;
+
+  e.borrado = true;
+  e.tocado = ahora();
+  if(activoId === idEst){
+    activoId = '';
+    escribir(CLAVE_ACTIVO, '');
+  }
+  guardarEstudios();
+  pintarTodo();
+  sincronizarPronto();
+  toast('Estudio borrado');
+}
+
+const botonBorrar = idEst =>
+  '<button type="button" class="icono-btn chico peligro" data-borrar="' + escapar(idEst) +
+  '" title="Borrar este estudio" aria-label="Borrar este estudio">&times;</button>';
 
 /* Borrar un tramo no borra su tiempo: se lo queda el tramo anterior. Si se
    descontara, el estudio dejaría de cuadrar con el reloj —la suma de los
@@ -1367,9 +1466,16 @@ function pintarFuera(fuera){
       '</div>' +
       '<div class="der"><div class="rend sin">' +
         (e.cerrado ? 'falta producción' : 'abierto') + '</div></div>' +
+      botonBorrar(e.id) +
     '</li>'
   ).join('');
 }
+
+/* «2 ciclo» se lee mal. Solo se pluraliza `ciclo`, que es la palabra que pone
+   la app; las unidades de verdad —m², ml, sacos— vienen como las escribieron y
+   no hay que adivinarles el plural. */
+const contar = (n, unidad) =>
+  fmt(n, 0) + ' ' + escapar(unidad === 'ciclo' && n !== 1 ? 'ciclos' : unidad);
 
 const LLAVES_GRUPO = {
   cas: e => [e.cuadrilla, e.actividad, e.subactividad],
@@ -1465,6 +1571,7 @@ function pintarRendimientos(){
           '<td class="n">' + hm(x.c.neto) + '</td>' +
           '<td class="n">' + (Number.isFinite(x.e.personas) ? x.e.personas : '—') + '</td>' +
           '<td class="n"><b>' + fmt(x.c.rendCuadrilla, 4) + '</b></td>' +
+          '<td class="acc">' + botonBorrar(x.e.id) + '</td>' +
         '</tr>'
       ).join('');
 
@@ -1474,7 +1581,7 @@ function pintarRendimientos(){
           '<div class="g1">' + escapar(titulo) + '</div>' +
           '<div class="g2">' + lista.length +
             (lista.length === 1 ? ' estudio' : ' estudios') + ' · ' +
-            fmt(sumaProd, 0) + ' ' + escapar(unidad) + ' medidos</div>' +
+            contar(sumaProd, unidad) + ' en total</div>' +
         '</div>' +
         '<div class="val"><div class="v">' + fmt(rend, 4) + '</div>' +
         '<div class="u">h.cuadr/' + escapar(unidad) + '</div></div>' +
@@ -1508,7 +1615,8 @@ function pintarRendimientos(){
 
         '<div class="tabla-wrap" style="margin-top:12px"><table class="datos">' +
         '<thead><tr><th>Fecha</th><th>Proyecto</th><th>Producción</th>' +
-        '<th>Neto</th><th>Personas</th><th>h.cuadr/' + escapar(unidad) + '</th></tr></thead>' +
+        '<th>Neto</th><th>Personas</th><th>h.cuadr/' + escapar(unidad) + '</th>' +
+        '<th></th></tr></thead>' +
         '<tbody>' + detalle + '</tbody></table></div>' +
       '</div>' +
     '</details>';
@@ -1690,7 +1798,7 @@ function conectar(){
   id('b-lectura').addEventListener('click', () => {
     const e = estudioActivo();
     if(!e) return;
-    if(e.cerrado) reabrirEstudio(e);
+    if(e.cerrado) seguirEstudio(e);
     else marcarLectura(e, 'Variable');
   });
 
@@ -1742,6 +1850,19 @@ function conectar(){
   id('i-produccion').addEventListener('focus', ev => subirALaVista(ev.target.closest('.campo')));
   id('i-nota').addEventListener('focus', ev => subirALaVista(ev.target.closest('.campo')));
 
+  /* Un estudio que cubrió un elemento de principio a fin no tiene nada que
+     medir: la producción es ese elemento. Se guarda como 1 ciclo, que no es un
+     número inventado —es literalmente lo que se observó— y deja que el estudio
+     entre en los promedios junto con los otros del mismo trabajo. */
+  id('b-un-ciclo').addEventListener('click', () => {
+    const e = estudioActivo();
+    if(!e) return;
+    e.produccion = 1;
+    e.unidad = 'ciclo';
+    tocar(e);
+    toast('Rendimiento por ciclo: lo que tomó el elemento completo');
+  });
+
   id('b-excel-uno').addEventListener('click', () => {
     const e = estudioActivo();
     if(e) exportar([e]);
@@ -1749,19 +1870,7 @@ function conectar(){
 
   id('b-borrar-estudio').addEventListener('click', () => {
     const e = estudioActivo();
-    if(!e) return;
-    if(!confirm('¿Borrar este estudio? Se borra también en los demás aparatos.')) return;
-    /* No se saca del arreglo: se marca borrado y se le pone fecha nueva. Es la
-       única forma de que el borrado se propague; si se sacara, el otro aparato
-       lo volvería a subir al sincronizar y reaparecería en todos lados. */
-    e.borrado = true;
-    e.tocado = ahora();
-    activoId = '';
-    escribir(CLAVE_ACTIVO, '');
-    guardarEstudios();
-    pintarTodo();
-    Nube.sincronizar(true);
-    toast('Estudio borrado');
+    if(e) borrarEstudio(e.id);
   });
 
   /* --- Filtro de Rendimientos --- */
@@ -1777,9 +1886,20 @@ function conectar(){
 
   id('b-excel-todos').addEventListener('click', () => exportar(estudiosFiltrados()));
 
+  /* Borrar desde donde se esté viendo el estudio. Va antes que el de abrir
+     porque la ✕ está adentro de la fila: sin este `return` de abajo, tocarla
+     abriría el estudio además de borrarlo. */
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-borrar]');
+    if(!b) return;
+    ev.preventDefault();
+    borrarEstudio(b.dataset.borrar);
+  });
+
   /* Abrir un estudio: desde el detalle de un grupo o desde los que todavía no
      tienen rendimiento. */
   document.addEventListener('click', ev => {
+    if(ev.target.closest('[data-borrar]')) return;
     const fila = ev.target.closest('[data-est]');
     if(!fila) return;
     activoId = fila.dataset.est;
